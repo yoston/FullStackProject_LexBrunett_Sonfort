@@ -1,42 +1,44 @@
 import React, { useContext, useState } from "react";
 import { Context } from "../store/appContext";
-import { Link , Redirect } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
-export const Create = () => {
+export const Modificar = () => {
+    const { id } = useParams();
     const { store, actions } = useContext(Context);
 
-    const [id, setId] = useState("");
-    const [name, setName] = useState("");
-    const [desc, setDesc] = useState("");
-    const [Cate, setCate] = useState("");
-    const [price, setPrice] = useState("");
-    const [amount, setAmount] = useState("");
+    const product = store.products.find(product => product.id == id);
     const [file, setFile] = useState(null);
-    let idu;
+    const [img, setImg] = useState(product.img || "");
+    const [idu, setIdu] = useState(product.idu || "");
+    const [name, setName] = useState(product.name || "");
+    const [desc, setDesc] = useState(product.description || "");
+    const [Cate, setCate] = useState(product.Category || "")
+    const [price, setPrice] = useState(product.price || "");
+    const [amount, setAmount] = useState(product.amount || "");
 
-    const isIdUnique = !(store.products.some(product => product.id == id));
-    const isFormValid = name && desc && Cate && price && amount && isIdUnique && id;
+    const isFormValid = name && desc && Cate &&price && amount;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
-            const temp = await actions.upload_img(file);
-            const url = temp[0];
-            idu = temp[1]
+            let url;
+            if (file) {
+                const temp = await actions.upload_img(file);
+                url = temp[0];
+                setIdu(temp[1])
+            }else url = img
 
             const product = {
                 id: id,
                 name: name,
                 description: desc,
-		Category: Cate,
+                Category: Cate,
                 price: price,
                 amount: amount,
                 url: url,
-                idu: idu
-            };
-
-            await actions.createdProduct(product);
+                idu : idu
+            }
+            await actions.updateProduct(id, product);
         } catch (error) {
             console.error(error)
         }
@@ -45,7 +47,7 @@ export const Create = () => {
     return (
         <div>
             <form>
-                <img width="100" src={file ? URL.createObjectURL(file) : null } alt="Imagen Seleccionada" />
+                <img width="100" src={ file === null ? img : URL.createObjectURL(file)} alt="Imagen Seleccionada" />
 
                 <div className="mb-3">
                     <label htmlFor="img" className="form-label">Imagen</label>
@@ -56,11 +58,6 @@ export const Create = () => {
                         onChange={(e)=> {setFile(e.target.files[0])}}
                     />
                 </div>
-                <div className="mb-3">
-                    <label htmlFor="id" className="form-label">Id</label>
-                    <input type="number" className="form-control" id="id" value={id} onChange={(e) => setId(e.target.value)} />
-                </div>
-                {isIdUnique ? null : <p style={{"color": "red"}}>"Id ya existe"</p>}
                 <div className="mb-3">
                     <label htmlFor="name" className="form-label">Name</label>
                     <input type="text" className="form-control" id="name" value={name} onChange={(e) => setName(e.target.value)} />
@@ -81,8 +78,12 @@ export const Create = () => {
                     <label htmlFor="amount" className="form-label">Amount</label>
                     <input type="number" className="form-control" id="amount" value={amount} onChange={(e) => setAmount(e.target.value)} />
                 </div>
-                
-                <button disabled={ !isFormValid } onClick={handleSubmit}>Crear Producto</button>
+                <Link to="/products">
+                    <button disabled={!isFormValid} onClick={handleSubmit}>Guardar Cambios</button>
+                </Link>
+                <Link to="/products">
+                    <button onClick={() => actions.deleteProduct(id,idu)}>Delete </button>
+                </Link>
             </form>
         </div>
     );
