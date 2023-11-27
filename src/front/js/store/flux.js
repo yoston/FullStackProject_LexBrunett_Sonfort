@@ -21,7 +21,7 @@ const getState = ({ getStore, getActions, setStore }) => {
     },
     actions: {
       updateList: () => {
-        fetch("https://cuddly-system-qgj7jwpqpvj3r57-3001.app.github.dev/api/products",
+        fetch("/products",
           {
             headers: {
               'Content-Type': 'application/json'
@@ -30,7 +30,7 @@ const getState = ({ getStore, getActions, setStore }) => {
           .then( data => setStore({ products: data }));
       },
       updateProduct: (id, obj) => {
-        fetch(`https://cuddly-system-qgj7jwpqpvj3r57-3001.app.github.dev/api/product/${id}`, {
+        fetch(`/product/${id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -47,7 +47,7 @@ const getState = ({ getStore, getActions, setStore }) => {
         }
       },      
       createdProduct: (obj) => {
-        fetch("https://cuddly-system-qgj7jwpqpvj3r57-3001.app.github.dev/api/product", {
+        fetch("/product", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -58,7 +58,7 @@ const getState = ({ getStore, getActions, setStore }) => {
           .then( data => console.log(data))
       },
       deleteProduct: (id,idu) => {
-        fetch("https://cuddly-system-qgj7jwpqpvj3r57-3001.app.github.dev/api/product/" + id, {
+        fetch("/product/" + id, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
