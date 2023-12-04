@@ -23,7 +23,7 @@ def post_product():
         id=body['id'],
         name=body['name'],
         description=body['description'],
-        Category=body['Category']
+        Category=body['Category'],
         price=body['price'],
         amount=body['amount'],
         img=body['url'],
