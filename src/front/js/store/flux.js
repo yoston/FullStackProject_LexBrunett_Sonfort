@@ -17,20 +17,20 @@ export const storage = getStorage(app);
 const getState = ({ getStore, getActions, setStore }) => {
   return {
     store: {
-      products: []
+      Categories: []
     },
     actions: {
       updateList: () => {
-        fetch("/products",
+        fetch("/Categories",
           {
             headers: {
               'Content-Type': 'application/json'
             },
           }).then( response => response.json())
-          .then( data => setStore({ products: data }));
+          .then( data => setStore({ Categories: data }));
       },
-      updateProduct: (id, obj) => {
-        fetch(`/product/${id}`, {
+      updateCategories: (id, obj) => {
+        fetch(`/Categories/${id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -40,14 +40,14 @@ const getState = ({ getStore, getActions, setStore }) => {
           .then(response => response.json())
           .then(data => console.log(data));
         
-        const product = getStore().products.find(product => product.id == id) 
-        if (product.url != obj.url){
-          const storageRef = ref( storage , `products/${obj.idu}`);
+        const Category = getStore().Categories.find(Category => Category.id == id) 
+        if (Category.url != obj.url){
+          const storageRef = ref( storage , `Categories/${obj.idu}`);
           deleteObject(storageRef);
         }
       },      
       createdProduct: (obj) => {
-        fetch("/product", {
+        fetch("/Categories", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -58,7 +58,7 @@ const getState = ({ getStore, getActions, setStore }) => {
           .then( data => console.log(data))
       },
       deleteProduct: (id,idu) => {
-        fetch("/product/" + id, {
+        fetch("/Categories/" + id, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
@@ -66,12 +66,12 @@ const getState = ({ getStore, getActions, setStore }) => {
         }).then( response => response.json())
           .then( data => console.log(data));
 
-        const storageRef = ref( storage , `products/${idu}`);
+        const storageRef = ref( storage , `Categories/${idu}`);
         deleteObject(storageRef);
       },
       upload_img : async (file) => {
         const idu =v4()
-        const storageRef = ref( storage , `products/${idu}`)
+        const storageRef = ref( storage , `Categories/${idu}`)
         await uploadBytes( storageRef,file )
         const url = await getDownloadURL(storageRef)
         return [url,idu]
