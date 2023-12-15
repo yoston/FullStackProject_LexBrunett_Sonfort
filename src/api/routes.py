@@ -2,72 +2,103 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Product
+from api.models import db, User, Admin, Orders
 from api.utils import generate_sitemap
 
 api = Blueprint('api', __name__)
 
-@api.route('/products', methods=['GET'])
-def get_products():
+@api.route('/admin', methods=['GET'])
+def get_admins():
 
-    all_products = Product.query.all()
-    products_seriallize = [product.serialize() for product in all_products]
+    all_admin = Admin.query.all()
+    admin_serialize = [Admin.serialize() for Admin in all_admin]
 
-    return jsonify(products_seriallize), 200
+    return jsonify(admin_serialize), 200
 
-@api.route('/product', methods=['POST'])
-def post_product():
+@api.route('/admin', methods=['POST'])
+def post_admins():
+
+    body = request.json
+    new_admin = Orders(id=body['id'],name=body['name'],description=body['description'],price=body['price'],amount=body['amount'])
+    db.session.add(new_admin)
+    db.session.commit()
+    
+    return jsonify({"message": "Admin creado con éxito"}), 200
+
+@api.route('/admin/<id>', methods=['PUT'])
+def put_admin(id):
+    admin = Admin.query.get(id)
     body = request.json
 
-    new_product = Product(
-        id=body['id'],
-        name=body['name'],
-        description=body['description'],
-        Category=body['Category']
-        price=body['price'],
-        amount=body['amount'],
-        img=body['url'],
-        idu=body['idu']
-    )
-
-    product = Product.query.filter_by(id=body['id']).first()
-    if (product) :
-        return jsonify({"message": "Prducto no creado, el ID ya existe"}), 400
+    if not admin:
+        return jsonify({"message": "Admin no encontrado"}), 404
     
-    db.session.add(new_product)
+    admin.name = body['name']
+    admin.description = body['description']
+    admin.category = body['category']
+    admin.products = body['products']
+
     db.session.commit()
     
-    return jsonify({"message": "Producto creado con exito"}), 200
+    return jsonify({"message": "Admin modificada con éxito"}), 200
 
-@api.route('/product/<id>', methods=['PUT'])
-def put_product(id):
-    product = Product.query.get(id)
+@api.route('/admin/<id>', methods=['DELETE'])
+def delete_admin(id):
+
+    admin = Admin.query.get(id)
+
+    if not admin:
+        return jsonify({"message": "Admin no encontrado"}), 404
+
+    db.session.delete(admin)
+    db.session.commit()
+    
+    return jsonify({"message": "Admin eliminada con éxito"}), 200
+
+@api.route('/Orders', methods=['GET'])
+def get_Orders():
+
+    all_Orders = Orders.query.all()
+    Orders_serialize = [Orders.serialize() for Orders in all_Orders]
+
+    return jsonify(Orders_serialize), 200
+
+@api.route('/Orders', methods=['POST'])
+def post_Orders():
+
+    body = request.json
+    new_Orders = Orders(id=body['id'],status=body['status'],payment=body['payment'],products=body['products'])
+    db.session.add(new_admin)
+    db.session.commit()
+    
+
+    return jsonify({"message": "Order creado con éxito"}), 200
+
+@api.route('/Orders/<id>', methods=['PUT'])
+def put_admin(id):
+    Orders = Orders.query.get(id)
     body = request.json
 
-    if not product:
-        return jsonify({"message": "Producto no encontrado"}), 404
+    if not Orders:
+        return jsonify({"message": "Orders no encontrado"}), 404
     
-    product.name = body['name']
-    product.description = body['description']
-    product.Category = body['Category']
-    product.price = body['price']
-    product.amount = body['amount']
-    product.img=body['url']
-    product.idu=body['idu']
+    Orders.status = body['status']
+    Orders.payment = body['payment']
+    Orders.products = body['products']
 
     db.session.commit()
     
-    return jsonify({"message": "Producto modificado con exito"}), 200
+    return jsonify({"message": "Orders modificada con éxito"}), 200
 
-@api.route('/product/<id>', methods=['DELETE'])
-def delete_product(id):
+@api.route('/Orders/<id>', methods=['DELETE'])
+def delete_Orders(id):
 
-    product = Product.query.get(id)
+    Orders = Orders.query.get(id)
 
-    if not product:
-        return jsonify({"message": "Producto no encontrado"}), 404
+    if not Orders:
+        return jsonify({"message": "Orders no encontrado"}), 404
 
-    db.session.delete(product)
+    db.session.delete(Orders)
     db.session.commit()
     
-    return jsonify({"message": "Producto eliminado con éxito"}), 200
+    return jsonify({"message": "Orders eliminada con éxito"}), 200

@@ -2,12 +2,11 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class User(db.Model):
+class Admin(db.Model):
+    __tablename__ = 'admin'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
-    phone_number = db.Column(db.String(80), unique=False, nullable=False)
-    Addres = db.Column(db.String(500), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
 
     def __repr__(self):
@@ -19,29 +18,22 @@ class User(db.Model):
             "email": self.email,
             # do not serialize the password, its a security breach
         }
-    
-class Product(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=False, nullable=False)
-    description = db.Column(db.String(500), unique=False, nullable=False)
-    Category = db.Column(db.String(80), unique=False, nullable=False)
-    price = db.Column(db.Integer, unique=False, nullable=False)
-    amount = db.Column(db.Integer, unique=False, nullable=False)
-    img = db.Column(db.String(250), unique=False, nullable=True)
-    idu = db.Column(db.String(250), unique=False, nullable=True)
+        
 
+class Orders(db.Model):
+    __tablename__ = 'orders'
+    id = db.Column(db.Integer, primary_key=True)
+    status = db.Column(db.Boolean(), unique=True, nullable=False)
+    payment = db.Column(db.Boolean(), unique=False, nullable=False)
+    # Establece la relación uno a muchos con productos
+    products = db.relationship('Product', backref='Trademark', lazy=True)
 
     def __repr__(self):
-        return f'<User {self.name}>'
+        return f'<User {self.email}>'
 
     def serialize(self):
         return {
             "id": self.id,
-            "name": self.name,
-            "description": self.description,
-            "Category": self.Category,
-            "price": self.price,
-            "amount": self.amount,
-            "img": self.img,
-            "idu": self.idu
+            "email": self.email,
+            # do not serialize the password, its a security breach
         }

@@ -17,7 +17,8 @@ export const storage = getStorage(app);
 const getState = ({ getStore, getActions, setStore }) => {
   return {
     store: {
-      products: []
+      products: [],
+      Orders: []
     },
     actions: {
       updateList: () => {
@@ -28,6 +29,46 @@ const getState = ({ getStore, getActions, setStore }) => {
             },
           }).then( response => response.json())
           .then( data => setStore({ products: data }));
+      },
+updateOrders: (id, obj) => {
+        fetch(`/Orders/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(obj)
+        })
+          .then(response => response.json())
+          .then(data => console.log(data));
+        
+        const Order = getStore().Orders.find(Order => Order.id == id) 
+        if (product.url != obj.url){
+          const storageRef = ref( storage , `Orders/${obj.idu}`);
+          deleteObject(storageRef);
+        }
+      },      
+      createdOrders: (obj) => {
+        fetch("/Orders", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(obj)
+        })
+          .then( response => response.json())
+          .then( data => console.log(data))
+      },
+      deleteOrders: (id,idu) => {
+        fetch("/Orders/" + id, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        }).then( response => response.json())
+          .then( data => console.log(data));
+
+        const storageRef = ref( storage , `products/${idu}`);
+        deleteObject(storageRef);
       },
       updateProduct: (id, obj) => {
         fetch(`/product/${id}`, {

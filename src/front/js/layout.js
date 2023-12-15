@@ -11,6 +11,14 @@ import { Create } from "./pages/create.jsx";
 import { Modificar } from "./pages/Modificar.jsx";
 import injectContext from "./store/appContext";
 
+import { Admin } from "./pages/Admin.jsx";
+import { Crear_Admin } from "./pages/Crear_Admin.jsx";
+import { Modificar_Admin } from "./pages/Modificar_Admin.jsx";
+
+import { Orders } from "./pages/Orders.jsx";
+import { Crear_Orders } from "./pages/Crear_Orders.jsx";
+import { Modificar_Orders } from "./pages/Modificar_Orders.jsx";
+
 import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
 
@@ -34,6 +42,12 @@ const Layout = () => {
                         <Route element={<Products />} path="/products" />
                         <Route element={<Modificar />} path="/Modificar/:id" />
                         <Route element={<Create />} path="/create" />
+                        <Route element={<Admin />} path="/Admin" />
+                        <Route element={<Crear_Admin />} path="/Crear_Admin" />
+                        <Route element={<Modificar_Admin />} path="/Modificar_Admin/:id" />
+                        <Route element={<Orders />} path="/Orders" />
+                        <Route element={<Crear_Orders />} path="/Crear_Orders" />
+                        <Route element={<Modificar_Orders />} path="/Modificar_Orders/:id" />
                         <Route element={<h1>Not found!</h1>} />
                     </Routes>
                     <Footer />
