@@ -17,7 +17,8 @@ export const storage = getStorage(app);
 const getState = ({ getStore, getActions, setStore }) => {
   return {
     store: {
-      products: []
+      products: [],
+      auth: false
     },
     actions: {
       updateList: () => {
