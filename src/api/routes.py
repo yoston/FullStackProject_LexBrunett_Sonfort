@@ -2,8 +2,12 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Product
-from api.utils import generate_sitemap
+from api.models import db, User, Product, Categories, Cart,  Orders
+from api.utils import generate_sitemap, APIException
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
+from flask_jwt_extended import JWTManager
 
 api = Blueprint('api', __name__)
 
@@ -73,52 +77,94 @@ def delete_product(id):
     return jsonify({"message": "Producto eliminado con éxito"}), 200
 
 
-@api.route('/carrito', methods=['GET'])
-def get_carrito():
-    all_items = Carrito.query.all()
+@api.route('/cart', methods=['GET'])
+@jwt_required()
+def get_carts():
+    id = get_jwt_identity()
+
+    all_items = Cart.query.filter_by( id_Restaurant = id  , id_Order = None ).all()
     items_serialize = [item.serialize() for item in all_items]
-    carrito_with_product_info = []
+    cart_with_product_info = []
+
     for item in items_serialize:
-        product_id = item["id_Producto"]
+        product_id = item["id_Product"]
         product = Product.query.get(product_id)
         if product:
             item['product_info'] = product.serialize()
-        carrito_with_product_info.append(item)
-    return jsonify(carrito_with_product_info), 200
+        cart_with_product_info.append(item)
 
-@api.route('/carrito/<int:id>', methods=['PUT'])
-def put_carrito(id):
-    carrito = Carrito.query.get(id)
-    if not carrito:
+    return jsonify(cart_with_product_info), 200
+
+@api.route('/cart/<int:id>', methods=['PUT'])
+def put_cart(id):
+    cart = Cart.query.get(id)
+
+    if not cart:
         return jsonify({"message": "Carrito no encontrado"}), 404
+    
     body = request.json
-    carrito.cantidad = body['cantidad']
-    carrito.id_Producto = body['id_Producto']
-    carrito.id_User = body['id_User']
+
+    cart.amount = body['amount']
+    cart.id_Producto = body['id_Product']
+    cart.id_Restaurant = body['id_Restaurant']
+    cart.id_Order = body['id_Order']
+
     db.session.commit()
+
     return jsonify({"message": "Carrito modificado con éxito"}), 200
 
-@api.route('/carrito', methods=['POST'])
-def post_carrito():
+@api.route('/cart_add_idOrder/<int:id>', methods=['PUT'])
+def add_order_cart(id):
+    cart = Cart.query.get(id)
+
+    if not cart:
+        return jsonify({"message": "Carrito no encontrado"}), 404
+    
     body = request.json
-    carrito = Carrito.query.filter_by(id=body['id']).first()
-    if carrito:
-        return jsonify({"message": "Carrito no creado, el ID ya existe"}), 400
-    new_carrito = Carrito(
-        id=body['id'],
-        cantidad=body['cantidad'],
-        id_Producto=body['id_Producto'],
-        id_User=body['id_User']
-    )
-    db.session.add(new_carrito)
+
+    cart.amount = body['amount']
+    cart.id_Producto = body['id_Product']
+    cart.id_Restaurant = body['id_Restaurant']
+    cart.id_Order = body['id_Order']
+
     db.session.commit()
+
+    return jsonify({"message": "orden annadida con éxito"}), 200
+
+@api.route('/cart', methods=['POST'])
+def post_cart():
+    body = request.json
+
+    existente = Cart.query.filter_by(id_Product = body['id_Product'], id_Restaurant = body['id_Restaurant'], id_Order = None).first()
+
+    if (existente):
+        existente.amount = existente.amount + 1,
+        existente.id_Product=body['id_Product'],
+        existente.id_Restaurant=body['id_Restaurant'],
+        existente.id_Order = body['id_Order'],
+
+        db.session.commit()
+    else : 
+        new_cart = Cart(
+            amount=body['amount'],
+            id_Product=body['id_Product'],
+            id_Restaurant=body['id_Restaurant'],
+            id_Order = body['id_Order']
+        )
+
+        db.session.add(new_cart)
+        db.session.commit()
+
     return jsonify({"message": "Carrito creado con éxito"}), 200
 
-@api.route('/carrito/<int:id>', methods=['DELETE'])
-def delete_carrito(id):
-    carrito = Carrito.query.get(id)
-    if not carrito:
+@api.route('/cart/<int:id>', methods=['DELETE'])
+def delete_cart(id):
+    cart = Cart.query.get(id)
+
+    if not cart:
         return jsonify({"message": "Carrito no encontrado"}), 404
-    db.session.delete(carrito)
+    
+    db.session.delete(cart)
     db.session.commit()
+
     return jsonify({"message": "Carrito eliminado con éxito"}), 200

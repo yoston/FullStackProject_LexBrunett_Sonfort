@@ -46,25 +46,25 @@ class Product(db.Model):
             "idu": self.idu
         }
 
-class Carrito(db.Model):
-    __tablename__ = 'carrito'
+class Cart(db.Model):
+    __tablename__ = 'cart'
     id = db.Column(db.Integer, primary_key=True)
-    cantidad = db.Column(db.Integer, unique=False, nullable=False)
-    id_Producto = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
-    producto = db.relationship('Product')
-    id_User = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user = db.relationship('User')
-    #id_Orden = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    #orden = db.relationship('Orden')
+    amount = db.Column(db.Integer, unique=False, nullable=False)
+    id_Product = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    product = db.relationship('Product')
+    id_Restaurant = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
+    restaurant = db.relationship('Restaurant')
+    id_Order = db.Column(db.String, db.ForeignKey('order.id'), nullable=True)
+    order = db.relationship('Order')
 
     def __repr__(self):
-        return f'<User {self.email}>'
+        return f'<Cart {self.id}>'
       
     def serialize(self):
         return {
             "id": self.id,
-            "cantidad": self.cantidad,
-            "id_Producto": self.id_Producto,
-            "id_User": self.id_User,
-            #"id_Orden": self.id_Orden
+            "amount": self.amount,
+            "id_Product": self.id_Product,
+            "id_Restaurant": self.id_Restaurant,
+            "id_Order": self.id_Order
         }
