@@ -2,13 +2,12 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class User(db.Model):
+class User (db.Model):
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(80), unique=False, nullable=False)
-    phone_number = db.Column(db.String(80), unique=False, nullable=False)
-    Addres = db.Column(db.String(500), unique=False, nullable=False)
-    is_active = db.Column(db.Boolean(), unique=False, nullable=False)
+    email = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(20), unique=False, nullable=False)
+    is_active = db.Column(db.Boolean(), unique=False, nullable=True)
 
     def __repr__(self):
         return f'<User {self.email}>'
@@ -17,54 +16,94 @@ class User(db.Model):
         return {
             "id": self.id,
             "email": self.email,
-            # do not serialize the password, its a security breach
+        }
+
+class Category (db.Model):
+    __tablename__ = 'category'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=False, nullable=False)
+    url_img = db.Column(db.String(320), unique=False, nullable=False)
+    idu_img = db.Column(db.String(320), unique=False, nullable=False)
+    
+    def __repr__(self):
+        return f'<Category {self.name}>'
+      
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "url_img": self.url_img,
+            "idu_img": self.idu_img
         }
     
-class Product(db.Model):
+class Product (db.Model):
+    __tablename__ = 'product'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=False, nullable=False)
     description = db.Column(db.String(500), unique=False, nullable=False)
-    Category = db.Column(db.String(80), unique=False, nullable=False)
     price = db.Column(db.Integer, unique=False, nullable=False)
     amount = db.Column(db.Integer, unique=False, nullable=False)
-    img = db.Column(db.String(250), unique=False, nullable=True)
-    idu = db.Column(db.String(250), unique=False, nullable=True)
-
+    url_img = db.Column(db.String(250), unique=False, nullable=True)
+    idu_img = db.Column(db.String(250), unique=False, nullable=True)
+    id_category = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+    category = db.relationship('Category')
 
     def __repr__(self):
-        return f'<User {self.name}>'
+        return f'<Product {self.name}>'
 
     def serialize(self):
         return {
             "id": self.id,
             "name": self.name,
             "description": self.description,
-            "Category": self.Category,
             "price": self.price,
             "amount": self.amount,
-            "img": self.img,
-            "idu": self.idu
-        }
-
-class Carrito(db.Model):
-    __tablename__ = 'carrito'
-    id = db.Column(db.Integer, primary_key=True)
-    cantidad = db.Column(db.Integer, unique=False, nullable=False)
-    id_Producto = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
-    producto = db.relationship('Product')
-    id_User = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user = db.relationship('User')
-    #id_Orden = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    #orden = db.relationship('Orden')
+             "url_img": self.url_img,
+            "idu_img": self.idu_img,
+            "id_category": self.id_category
+          
+class Order (db.Model):
+    __tablename__ = 'order'
+    id = db.Column(db.String , primary_key=True)
+    state = db.Column(db.String(80), unique=False, nullable=False)
+    day_Date = db.Column(db.String(20), unique=False, nullable=False)
+    month_Date = db.Column(db.String(20), unique=False, nullable=False)
+    year_Date = db.Column(db.String(20), unique=False, nullable=False)
+    id_Restaurant = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
+    restaurant = db.relationship('Restaurant')
+    id_Sucursale = db.Column(db.Integer, db.ForeignKey('sucursale.id'), nullable=False)
+    sucursale = db.relationship('Sucursale')
 
     def __repr__(self):
-        return f'<User {self.email}>'
-      
+        return f'<Orden {self.id}>'
+
     def serialize(self):
         return {
             "id": self.id,
-            "cantidad": self.cantidad,
-            "id_Producto": self.id_Producto,
-            "id_User": self.id_User,
-            #"id_Orden": self.id_Orden
+            "state": self.state,
+            "day_Date": self.day_Date,
+            "month_Date": self.month_Date,
+            "year_Date": self.year_Date,
+            "id_Restaurant": self.id_Restaurant,
+            "id_Sucursale": self.id_Sucursale
         }
+
+class Cart(db.Model):
+    __tablename__ = 'cart'
+    id = db.Column(db.Integer, primary_key=True)
+    amount = db.Column(db.Integer, unique=False, nullable=False)
+    id_Product = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    product = db.relationship('Product')
+    id_Restaurant = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
+    restaurant = db.relationship('Restaurant')
+    id_Order = db.Column(db.String, db.ForeignKey('order.id'), nullable=True)
+    order = db.relationship('Order')
+
+    def __repr__(self):
+        return f'<Cart {self.id}>'
+            "amount": self.amount,
+            "id_Product": self.id_Product,
+            "id_Restaurant": self.id_Restaurant,
+            "id_Order": self.id_Order
+        }
+
