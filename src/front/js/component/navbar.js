@@ -2,8 +2,8 @@ import React, { useContext, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Context } from "../store/appContext";
 import { User_login } from "../pages/user_login.jsx";
-import logo from "../../img/logo.png"
-import logo2 from "../../img/logo2.png"
+import logo from "../../img/logo.jpg"
+import logo2 from "../../img/logo2.jpg"
 import logout from "../../img/logout.png"
 import { Carrito } from "./carrito.jsx";
 
