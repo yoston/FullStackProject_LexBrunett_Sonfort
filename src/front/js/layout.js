@@ -3,8 +3,9 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import ScrollToTop from "./component/scrollToTop";
 import { BackendURL } from "./component/backendURL";
 
-import { Categories } from "./pages/Categories.jsx";
-import { Crear_Categoria } from "./pages/Crear_Categoria.jsx";
+import { Categorias } from "./pages/categorias.jsx";
+import { Categorias_user } from "./pages/categorias_user.jsx";
+import { Crear_categorias } from "./pages/create_category.jsx";
 import { Modificar_categorias } from "./pages/modificar_categorias.jsx";
 
 import { Home } from "./pages/home";
@@ -32,8 +33,8 @@ const Layout = () => {
                 <ScrollToTop>
                     <Navbar />
                     <Routes>
-                        <Route element={<Categories />} path="/Categories" />
-                        <Route element={<Crear_Categoria />} path="/crear" />
+                        <Route element={<Categorias />} path="/categorias" />
+                        <Route element={<Crear_categorias />} path="/crear_categorias" />
                         <Route element={<Modificar_categorias />} path="/modificar_categorias/:theid" />
                         <Route element={<Home />} path="/" />
                         <Route element={<Demo />} path="/demo" />

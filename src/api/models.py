@@ -21,19 +21,20 @@ class User(db.Model):
         }
     
 
-class Categories(db.Model):
+class Category (db.Model):
+    __tablename__ = 'category'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=False, nullable=False)
-    img = db.Column(db.String(250), unique=False, nullable=True)
-
-
+    url_img = db.Column(db.String(320), unique=False, nullable=False)
+    idu_img = db.Column(db.String(320), unique=False, nullable=False)
+    
     def __repr__(self):
-        return f'<User {self.name}>'
-
+        return f'<Category {self.name}>'
+      
     def serialize(self):
         return {
             "id": self.id,
             "name": self.name,
-            "img": self.img
+            "url_img": self.url_img,
+            "idu_img": self.idu_img
         }
-
