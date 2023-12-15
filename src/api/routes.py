@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Product, Category, Cart, Order
+from api.models import db, User, Product, Category, Cart, Restaurant, Sucursale, Order
 from api.utils import generate_sitemap, APIException
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
@@ -70,7 +70,7 @@ def post_login_user():
         return jsonify({"msg": "Bad username or password"}), 401
  
     access_token = create_access_token(identity=user.id)
-    return jsonify({ "token": access_token, "user_id": user.id , "user":"restaurant"}) , 200
+    return jsonify({ "token": access_token, "user_id": user.id , "user":"restaurant", "name": user.name}) , 200 
 
 @api.route("/login_admin", methods=["POST"])
 def post_login_admin():
@@ -204,7 +204,7 @@ def delete_categories(id):
 def get_carts():
     id = get_jwt_identity()
 
-    all_items = Cart.query.filter_by(id_Restaurant = id).all()
+    all_items = Cart.query.filter_by(id_Restaurant=id, id_Order=None).all()
     items_serialize = [item.serialize() for item in all_items]
     cart_with_product_info = []
 
@@ -291,6 +291,133 @@ def delete_cart(id):
 
     return jsonify({"message": "Carrito eliminado con éxito"}), 200
 
+@api.route('/restaurant', methods=['GET'])
+def get_restaurant():
+    all_restaurant = Restaurant.query.all()
+    Restaurant_seriallize = list (map(lambda restaurant: restaurant.serialize(),all_restaurant))
+
+    return jsonify(Restaurant_seriallize), 200
+
+@api.route('/restaurant/<int:id>', methods=['PUT'])
+def put_restaurant(id):
+    restaurant = Restaurant.query.get(id)
+    body = request.json
+
+    if not restaurant:
+        return jsonify({"message": "Restaurante no encontrado"}), 404
+    
+    restaurant.name = body["name"]
+    restaurant.type = body["type"]
+    restaurant.description = body["description"]
+    restaurant.name_contact = body["name_contact"]
+    restaurant.num_contact = body["num_contact"]
+    
+    db.session.commit()
+
+    return jsonify({"message": "Restaurante modificado con éxito"}), 200
+
+@api.route('/restaurant', methods=['POST'])
+def post_restaurant():
+    body = request.json
+    restaurant = Restaurant.query.filter_by(name = body['name']).first()
+    
+    if restaurant:
+        return jsonify({"msg": "Restaurante ya existe"}), 401
+
+    new_restaurant = Restaurant(
+        name=body["name"],
+        password = body['password'],
+        type=body["type"],
+        description=body["description"],
+        name_contact=body["name_contact"],
+        num_contact=body["num_contact"]
+    )
+    db.session.add(new_restaurant)
+    db.session.commit()
+
+    return jsonify({"message": "Restaurante creado con éxito"}), 200
+
+@api.route('/restaurant/<int:id>', methods=['DELETE'])
+def delete_restaurant(id):
+
+    restaurant = Restaurant.query.get(id)
+
+    if not restaurant:
+        return jsonify({"message": "Restaurante no encontrado"}), 404
+
+    db.session.delete(restaurant)
+    db.session.commit()
+    
+    return jsonify({"message": "Restaurante eliminado con éxito"}), 200
+
+@api.route('/sucursale', methods=['GET'])
+@jwt_required()
+def get_sucursale():
+    restaurant_id = get_jwt_identity()
+    print("solicitado")
+    
+    all_sucursale = Sucursale.query.filter_by( id_Restaurant = restaurant_id ).all()
+
+    Sucursale_seriallize = [item.serialize() for item in all_sucursale]
+    print(Sucursale_seriallize)
+    return jsonify(Sucursale_seriallize), 200
+
+@api.route('/sucursale/<int:id>', methods=['PUT'])
+def put_sucursale(id):
+    sucursale = Sucursale.query.get(id)
+    body = request.json
+
+    if not Sucursale:
+        return jsonify({"message": "Sucursal no encontrado"}), 404
+    
+    sucursale.name = body['name']
+    sucursale.type = body['type']
+    sucursale.url_img = body["url_img"]
+    sucursale.idu_img = body["idu_img"]
+    sucursale.name_contact = body['name_contact']
+    sucursale.num_contact = body['num_contact']
+    sucursale.dir = body["dir"]
+    sucursale.city = body["city"]
+    sucursale.country = body["country"]
+    sucursale.id_Restaurant = body['id_Restaurant']
+    
+    db.session.commit()
+
+    return jsonify({"message": "Sucursal modificada con éxito"}), 200
+
+@api.route('/sucursale', methods=['POST'])
+def post_sucursale():
+    body = request.json
+    new_sucursale = Sucursale(
+        name=body['name'],
+        type=body["type"],
+        name_contact=body["name_contact"],
+        num_contact=body["num_contact"],
+        dir=body["dir"],
+        city=body["city"],
+        country=body["country"],
+        url_img = body["url_img"],
+        idu_img = body["idu_img"],
+        id_Restaurant = body['id_Restaurant']
+    )
+
+    db.session.add(new_sucursale)
+    db.session.commit()
+
+    return jsonify({"message": "Sucursal creada con éxito"}), 200
+
+@api.route('/sucursale/<int:id>', methods=['DELETE'])
+def delete_sucursale(id):
+
+    sucursale = Sucursale.query.get(id)
+
+    if not sucursale:
+        return jsonify({"message": "Sucursal no encontrada"}), 404
+
+    db.session.delete(sucursale)
+    db.session.commit()
+    
+    return jsonify({"message": "Sucursal eliminada con éxito"}), 200
 
 @api.route('/order', methods=['GET'])
 @jwt_required()
@@ -298,14 +425,6 @@ def get_order():
     restaurant_id = get_jwt_identity()
     
     all_order = Order.query.filter_by( id_Restaurant = restaurant_id ).all()
-
-    Order_seriallize = [item.serialize() for item in all_order]
-    return jsonify(Order_seriallize), 200
-
-@api.route('/all_order', methods=['GET'])
-@jwt_required()
-def get_all_order():
-    all_order = Order.query.all()
     order_seriallize = [item.serialize() for item in all_order]
     order_with_info = []
 
@@ -323,6 +442,37 @@ def get_all_order():
 
     return jsonify(order_with_info), 200
 
+@api.route('/all_order', methods=['GET'])
+@jwt_required()
+def get_all_order():
+    all_order = Order.query.all()
+    order_with_info = []
+
+    for item in all_order:
+        restaurant_id = item.id_Restaurant
+        sucursale_id = item.id_Sucursale
+        restaurant = Restaurant.query.get(restaurant_id)
+        sucursale = Sucursale.query.get(sucursale_id)
+        carts = Cart.query.filter_by(id_Order=item.id)
+        cart_with_product_info = []
+
+        for cart in carts:
+            product = Product.query.get(cart.id_Product)
+            cart_info = {
+                'product_info': product.serialize(),
+            }
+            cart_with_product_info.append(cart_info)
+
+        order_item = item.serialize()
+
+        order_item['restaurant_info'] = restaurant.serialize()
+        order_item['sucursale_info'] = sucursale.serialize()
+        order_item['products'] = cart_with_product_info
+        order_with_info.append(order_item)
+
+    return jsonify(order_with_info), 200
+
+
 @api.route('/order/<id>', methods=['PUT'])
 def put_order(id):
     order = Order.query.get(id)
@@ -335,6 +485,7 @@ def put_order(id):
     order.day_Date = body['day_Date']
     order.month_Date = body["month_Date"]
     order.year_Date = body["year_Date"]
+    order.value = body["value"]
     order.id_Restaurant = body['id_Restaurant']
     order.id_Sucursale = body['id_Sucursale']
     
@@ -350,6 +501,7 @@ def post_order():
         state= "Creada",
         day_Date=body["day_Date"],
         month_Date=body["month_Date"],
+        value=body["value"],
         year_Date=body["year_Date"],
         id_Restaurant=body["id_Restaurant"],
         id_Sucursale=body["id_Sucursale"],
