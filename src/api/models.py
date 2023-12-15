@@ -45,3 +45,26 @@ class Product(db.Model):
             "img": self.img,
             "idu": self.idu
         }
+
+class Carrito(db.Model):
+    __tablename__ = 'carrito'
+    id = db.Column(db.Integer, primary_key=True)
+    cantidad = db.Column(db.Integer, unique=False, nullable=False)
+    id_Producto = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    producto = db.relationship('Product')
+    id_User = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User')
+    #id_Orden = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    #orden = db.relationship('Orden')
+
+    def __repr__(self):
+        return f'<User {self.email}>'
+      
+    def serialize(self):
+        return {
+            "id": self.id,
+            "cantidad": self.cantidad,
+            "id_Producto": self.id_Producto,
+            "id_User": self.id_User,
+            #"id_Orden": self.id_Orden
+        }

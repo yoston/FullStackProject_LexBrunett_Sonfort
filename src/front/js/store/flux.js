@@ -75,6 +75,33 @@ const getState = ({ getStore, getActions, setStore }) => {
         await uploadBytes( storageRef,file )
         const url = await getDownloadURL(storageRef)
         return [url,idu]
+      },
+      get_carrito :  () => {
+        fetch(process.env.BACKEND_URL + 'api/carrito', {
+					headers: {
+						'Content-Type': 'application/json'
+					},
+				}).then((response) => response.json())
+				.then((data) => setStore({ carrito: data }))
+      },
+      set_carrito : (updatedCart , id) => {
+        fetch(process.env.BACKEND_URL + 'api/carrito/'+ id, {
+          method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+          body: JSON.stringify(updatedCart)
+				}).then((response) => response.json())
+				.then((data) => console.log(data))
+      },
+      delete_carrito : (id) => {
+        fetch(process.env.BACKEND_URL + 'api/carrito/' + id, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        }).then( response => response.json())
+          .then( data => console.log(data));
       }
     }
   };
