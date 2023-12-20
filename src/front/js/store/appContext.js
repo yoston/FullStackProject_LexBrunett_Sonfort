@@ -21,10 +21,12 @@ const injectContext = PassedComponent => {
 			})
 		);
 
-		useEffect(() => {		
+		useEffect(() => {	
+			//state.actions.validar()
 			state.actions.getList();	
 			state.actions.getCategories();
-			state.actions.getCart();
+			state.actions.getLatLng();
+			state.store.auth ? state.actions.getCart() : null;
 		}, []);
 
 		// The initial value for the context is not null anymore, but the current state of this component,
@@ -32,7 +34,7 @@ const injectContext = PassedComponent => {
 		// on the state of this component
 		return (
 			<Context.Provider value={state}>
-			<PassedComponent {...props} />
+				<PassedComponent {...props} />
 			</Context.Provider>
 		);
 	};

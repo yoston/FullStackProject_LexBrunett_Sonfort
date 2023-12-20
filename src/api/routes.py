@@ -67,7 +67,7 @@ def post_login_user():
         return jsonify({"msg": "Bad username or password"}), 401
  
     access_token = create_access_token(identity=user.id)
-    return jsonify({ "token": access_token, "user_id": user.id , "user":"restaurant", "name": user.name}) , 200 
+    return jsonify({ "token": access_token, "user_id": user.id ,  "name": user.name}) , 200 
 
 @api.route("/login_admin", methods=["POST"])
 def post_login_admin():
@@ -225,7 +225,6 @@ def put_cart(id):
 
     cart.amount = body['amount']
     cart.id_Producto = body['id_Product']
-    cart.id_Restaurant = body['id_Restaurant']
     cart.id_Order = body['id_Order']
 
     db.session.commit()
@@ -243,7 +242,6 @@ def add_order_cart(id):
 
     cart.amount = body['amount']
     cart.id_Producto = body['id_Product']
-    cart.id_Restaurant = body['id_Restaurant']
     cart.id_Order = body['id_Order']
 
     db.session.commit()
@@ -254,12 +252,11 @@ def add_order_cart(id):
 def post_cart():
     body = request.json
 
-    existente = Cart.query.filter_by(id_Product = body['id_Product'], id_Restaurant = body['id_Restaurant'], id_Order = None).first()
+    existente = Cart.query.filter_by(id_Product = body['id_Product'], id_Order = None).first()
 
     if (existente):
         existente.amount = existente.amount + 1,
         existente.id_Product=body['id_Product'],
-        existente.id_Restaurant=body['id_Restaurant'],
         existente.id_Order = body['id_Order'],
 
         db.session.commit()
@@ -267,7 +264,6 @@ def post_cart():
         new_cart = Cart(
             amount=body['amount'],
             id_Product=body['id_Product'],
-            id_Restaurant=body['id_Restaurant'],
             id_Order = body['id_Order']
         )
 
@@ -291,22 +287,13 @@ def delete_cart(id):
 @api.route('/order', methods=['GET'])
 @jwt_required()
 def get_order(): 
-    restaurant_id = get_jwt_identity()
     
-    all_order = Order.query.filter_by( id_Restaurant = restaurant_id ).all()
+    all_order = Order.query.all()
     order_seriallize = [item.serialize() for item in all_order]
     order_with_info = []
 
     for item in order_seriallize:
-        restaurant_id = item["id_Restaurant"]
-        sucursale_id = item["id_Sucursale"]
-        restaurant = Restaurant.query.get(restaurant_id)
-        sucursale = Sucursale.query.get(sucursale_id)
-
         order_item = item.copy()
-
-        order_item['restaurant_info'] = restaurant.serialize()
-        order_item['sucursale_info'] = sucursale.serialize()
         order_with_info.append(order_item)
 
     return jsonify(order_with_info), 200
@@ -318,10 +305,6 @@ def get_all_order():
     order_with_info = []
 
     for item in all_order:
-        restaurant_id = item.id_Restaurant
-        sucursale_id = item.id_Sucursale
-        restaurant = Restaurant.query.get(restaurant_id)
-        sucursale = Sucursale.query.get(sucursale_id)
         carts = Cart.query.filter_by(id_Order=item.id)
         cart_with_product_info = []
 
@@ -334,8 +317,6 @@ def get_all_order():
 
         order_item = item.serialize()
 
-        order_item['restaurant_info'] = restaurant.serialize()
-        order_item['sucursale_info'] = sucursale.serialize()
         order_item['products'] = cart_with_product_info
         order_with_info.append(order_item)
 
@@ -355,8 +336,6 @@ def put_order(id):
     order.month_Date = body["month_Date"]
     order.year_Date = body["year_Date"]
     order.value = body["value"]
-    order.id_Restaurant = body['id_Restaurant']
-    order.id_Sucursale = body['id_Sucursale']
     
     db.session.commit()
 
@@ -372,8 +351,6 @@ def post_order():
         month_Date=body["month_Date"],
         value=body["value"],
         year_Date=body["year_Date"],
-        id_Restaurant=body["id_Restaurant"],
-        id_Sucursale=body["id_Sucursale"],
     )
 
     db.session.add(new_order)

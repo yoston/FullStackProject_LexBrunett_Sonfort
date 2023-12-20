@@ -22,8 +22,6 @@ export const All_ordenes = () => {
                 <th>Estado</th>
                 <th>Fecha</th>
                 <th>Valor</th>
-                <th>Restaurante</th>
-                <th>Sucursal</th>
                 <th></th>
               </tr>
             </thead>
@@ -53,8 +51,6 @@ export const All_ordenes = () => {
 
                   <td>{item.day_Date}/{item.month_Date}/{item.year_Date}</td>
                   <td>$ {item.value}</td>
-                  <td>{item.restaurant_info.name}</td>
-                  <td>{item.sucursale_info.name}</td>
                   <td className="td">
                     <div className="dropdown">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-three-dots-vertical dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" viewBox="0 0 16 16">

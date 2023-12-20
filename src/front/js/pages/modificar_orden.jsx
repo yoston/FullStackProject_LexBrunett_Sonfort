@@ -17,8 +17,6 @@ export const Modificar_orden = () => {
             month_Date: store.order[index].month_Date,
             year_Date: store.order[index].year_Date,
             state: state,
-            id_Restaurant: store.order[index].id_Restaurant,
-            id_Sucursale: store.order[index].id_Sucursale,
             value: store.order[index].value
         }
         await actions.putOrder(order, store.order[index].id);
@@ -47,18 +45,6 @@ export const Modificar_orden = () => {
                 
          
                 <div className="row mb-5">
-                    <div className="col">
-                        <p><b>Restaurante</b></p>
-                        <p className="m-0">{store.order[index].restaurant_info.name}</p>
-                    </div>
-                    <div className="col">
-                        <p><b>Sucursal</b></p>
-                        <p className="m-0">{store.order[index].sucursale_info.name}</p>
-                        <p className="m-0">{store.order[index].sucursale_info.dir}</p>
-                        <p className="m-0">{store.order[index].sucursale_info.city}, {store.order[index].sucursale_info.country}</p>
-                        <p className="m-0">{store.order[index].sucursale_info.name_contact}</p>
-                        <p className="m-0">{store.order[index].sucursale_info.num_contact}</p>
-                    </div>
                     <div className="col">
                         <p><b>Fecha</b></p>
                         <p className="my-3">{store.order[index].day_Date}/{store.order[index].month_Date}/{store.order[index].year_Date}</p>

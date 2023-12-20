@@ -70,10 +70,6 @@ class Order (db.Model):
     month_Date = db.Column(db.String(20), unique=False, nullable=False)
     year_Date = db.Column(db.String(20), unique=False, nullable=False)
     value = db.Column(db.Integer, unique=False, nullable=True)
-    id_Restaurant = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
-    restaurant = db.relationship('Restaurant')
-    id_Sucursale = db.Column(db.Integer, db.ForeignKey('sucursale.id'), nullable=False)
-    sucursale = db.relationship('Sucursale')
 
     def __repr__(self):
         return f'<Orden {self.id}>'
@@ -86,8 +82,6 @@ class Order (db.Model):
             "month_Date": self.month_Date,
             "year_Date": self.year_Date,
             "value": self.value,
-            "id_Restaurant": self.id_Restaurant,
-            "id_Sucursale": self.id_Sucursale
         }
 
 class Cart(db.Model):
@@ -96,8 +90,6 @@ class Cart(db.Model):
     amount = db.Column(db.Integer, unique=False, nullable=False)
     id_Product = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     product = db.relationship('Product')
-    id_Restaurant = db.Column(db.Integer, db.ForeignKey('restaurant.id'), nullable=False)
-    restaurant = db.relationship('Restaurant')
     id_Order = db.Column(db.String, db.ForeignKey('order.id'), nullable=True)
     order = db.relationship('Order')
 
@@ -108,6 +100,5 @@ class Cart(db.Model):
             "id": self.id,
             "amount": self.amount,
             "id_Product": self.id_Product,
-            "id_Restaurant": self.id_Restaurant,
             "id_Order": self.id_Order
         }
