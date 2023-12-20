@@ -30,6 +30,7 @@ import { Products2 } from "./pages/product2.jsx";
 import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
 
+
 const Layout = () => {
     const basename = process.env.BASENAME || "";
 
@@ -45,6 +46,7 @@ const Layout = () => {
                         <Route element={<Crear_categorias />} path="/crear_categorias" />
                         <Route element={<Modificar_categorias />} path="/modificar_categorias/:theid" />
                         <Route element={<Products />} path="/products" />
+
                         <Route element={<Create_productos />} path="/create" />
                         <Route element={<Modificar_productos />} path="/modificar/:id" />
                         <Route element={<Crear_restaurantes />} path="/user_registration" />

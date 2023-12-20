@@ -40,8 +40,3 @@ class Category (db.Model):
             "description": self.description,
             "price": self.price,
             "amount": self.amount,
-             "url_img": self.url_img,
-            "idu_img": self.idu_img,
-            "id_category": self.id_category
-          
-
