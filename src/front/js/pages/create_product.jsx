@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { Context } from "../store/appContext";
 import { Link, Navigate } from "react-router-dom";
-import default_rest from "../../img/default_rest.jpg"
+import default_rest from "../../img/default_rest.png"
 
 export const Create_productos = () => {
     const { store, actions } = useContext(Context);

@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 import back1 from "../../img/back1.jpg"
-import back2 from "../../img/back2.jpg"
+import back2 from "../../img/back2.png"
 
 export const Slide = () => {
     return (
