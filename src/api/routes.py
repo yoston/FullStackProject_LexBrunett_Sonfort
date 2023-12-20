@@ -1,9 +1,10 @@
-"""
-This module takes care of starting the API Server, Loading the DB and Adding the endpoints
-"""
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Categories
-from api.utils import generate_sitemap
+from api.models import db, User, Product, Category, Cart, Restaurant, Sucursale, Order
+from api.utils import generate_sitemap, APIException
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
+from flask_jwt_extended import JWTManager
 
 api = Blueprint('api', __name__)
 
@@ -55,20 +56,3 @@ def delete_categories(id):
 
     return jsonify({"message": "Categoría eliminada con éxito"}), 200
 
-@api.route('/cart', methods=['GET'])
-@jwt_required()
-def get_carts():
-    id = get_jwt_identity()
-
-    all_items = Cart.query.filter_by( id_Restaurant = id  , id_Order = None ).all()
-    items_serialize = [item.serialize() for item in all_items]
-    cart_with_product_info = []
-
-    for item in items_serialize:
-        product_id = item["id_Product"]
-        product = Product.query.get(product_id)
-        if product:
-            item['product_info'] = product.serialize()
-        cart_with_product_info.append(item)
-
-    return jsonify(cart_with_product_info), 200
