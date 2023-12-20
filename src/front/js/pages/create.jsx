@@ -29,7 +29,7 @@ export const Create = () => {
                 id: id,
                 name: name,
                 description: desc,
-		Category: Cate,
+                Category: Cate,
                 price: price,
                 amount: amount,
                 url: url,

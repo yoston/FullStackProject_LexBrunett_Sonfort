@@ -2,23 +2,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class Admin(db.Model):
-    __tablename__ = 'admin'
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(80), unique=False, nullable=False)
-    is_active = db.Column(db.Boolean(), unique=False, nullable=False)
-
-    def __repr__(self):
-        return f'<User {self.email}>'
-
-    def serialize(self):
-        return {
-            "id": self.id,
-            "email": self.email,
-            # do not serialize the password, its a security breach
-        }
-        
 
 class Orders(db.Model):
     __tablename__ = 'orders'
@@ -29,11 +12,15 @@ class Orders(db.Model):
     products = db.relationship('Product', backref='Trademark', lazy=True)
 
     def __repr__(self):
-        return f'<User {self.email}>'
 
     def serialize(self):
         return {
             "id": self.id,
             "email": self.email,
-            # do not serialize the password, its a security breach
-        }
+            "name": self.name,
+            "url_img": self.url_img,
+            "idu_img": self.idu_img
+            "description": self.description,
+            "price": self.price,
+            "amount": self.amount,
+
