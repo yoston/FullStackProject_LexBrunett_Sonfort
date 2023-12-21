@@ -14,7 +14,7 @@ export const Slide = () => {
                         <div className="ps-lg-12 py-lg-16 col-xxl-5 col-md-7 py-14 px-8 text-xs-center" style={{width:"400px", height:"320px" , marginLeft:"100px"}}>
                             <span className="badge" style={{background:"#ffc107", color:"black"}}>Descuento por Apertura del 40%</span>
 
-                            <h2 className="text-dark display-5 fw-bold mt-4">Tienda de Cosplays</h2>
+                            <h2 className="text-white display-5 fw-bold mt-4">Tienda de Cosplays</h2>
                             <p className="lead">Compra tus cosplays yu accesorios con Seguridad y de forma Rapida.</p>
                             <Link to="/lista_por_categorias/19">
                                 <button href="#!" className="btn btn-dark mt-3" tabIndex="-1">
@@ -29,7 +29,7 @@ export const Slide = () => {
                         <div className="ps-lg-12 py-lg-16 col-xxl-5 col-md-7 py-14 px-8 text-xs-center" style={{width:"400px", height:"320px" , marginLeft:"100px"}}>
                             <span className="badge" style={{background:"#ffc107", color:"black"}}>Descuento por apertura del 40%</span>
 
-                            <h2 className="text-dark display-5 fw-bold mt-4">Cosplays de alta calidad</h2>
+                            <h2 className="text-white display-5 fw-bold mt-4">Cosplays de alta calidad</h2>
                             <p className="lead">Descubre la nueva forma de comprar lo que necesitas tus convenciones de anime!</p>
                             <Link to="/lista_por_categorias/20">
                                 <button href="#!" className="btn btn-dark mt-3" tabIndex="0">

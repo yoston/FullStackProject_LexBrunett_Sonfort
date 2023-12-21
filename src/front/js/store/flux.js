@@ -35,7 +35,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 		store: {
 			categories: [],
 			products: [],
-			restaurants: [],
+			carrito: [],
 			order: [],
 			lat: 4.6556,
 			lng: -74.07,
@@ -73,7 +73,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				await fetch(process.env.BACKEND_URL + "api/login_user", {
 					method: 'POST',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin':'*'
 					},
 					body: JSON.stringify({
 						name : name,
@@ -101,7 +102,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				fetch(process.env.BACKEND_URL + "api/login_admin", {
 					method: 'POST',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin':'*'
 					},
 					body: JSON.stringify({
 						email : email,
@@ -134,7 +136,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				fetch(process.env.BACKEND_URL + "api/user", {
 					method: 'POST',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin':'*'
 					},
 					body: JSON.stringify(user)
 				})
@@ -150,7 +153,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				await fetch(process.env.BACKEND_URL + "api/category", {
 					method: 'POST',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin':'*'
 					},
 					body: JSON.stringify(obj)
 				})
@@ -162,7 +166,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				await fetch(process.env.BACKEND_URL + 'api/category/'+id, {
 					method: 'PUT',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin':'*'
 					},
 					body: JSON.stringify(obj) 
 				})
@@ -174,7 +179,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				await fetch(process.env.BACKEND_URL + 'api/category/'+id, {
 					method: 'DELETE',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin':'*'
 					},
 				})
 				.then((response) => response.json())
@@ -185,7 +191,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				fetch(process.env.BACKEND_URL + 'api/products', 
 				{
 					headers: {
-						'Content-Type': 'application/json'
+						
+						'Access-Control-Allow-Origin':'*'
 					},
 				})
 				.then( response => response.json())
@@ -195,7 +202,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				await fetch(process.env.BACKEND_URL + `api/products/${id}`, {
 					method: 'PUT',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin':'*'
 					},
 					body: JSON.stringify(obj)
 				})
@@ -209,7 +217,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				await fetch(process.env.BACKEND_URL + 'api/products', {
 					method: 'POST',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin':'*'
 					},
 					body: JSON.stringify(obj)
 				})
@@ -221,7 +230,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				await fetch(process.env.BACKEND_URL + 'api/products/' + id, {
 				method: 'DELETE',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
+					'Access-Control-Allow-Origin':'*'
 				},
 				}).then( response => response.json())
 				.then( data => console.log(data));
@@ -241,6 +251,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				fetch(process.env.BACKEND_URL + 'api/cart', {
 					headers: {
 						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin':'*',
 						'Authorization': `Bearer ${localStorage.getItem('token')}`
 					},
 				})
@@ -251,7 +262,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				await fetch(process.env.BACKEND_URL + 'api/cart/'+ id, {
 					method: 'PUT',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin':'*'
 					},
 					body: JSON.stringify(updatedCart)
 				})
@@ -263,7 +275,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				await fetch(process.env.BACKEND_URL + 'api/cart_add_idOrder/'+ id, {
 					method: 'PUT',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin':'*'
 					},
 					body: JSON.stringify(updatedCart)
 				})
@@ -275,7 +288,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				await fetch(process.env.BACKEND_URL + 'api/cart', {
 					method: 'POST',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin':'*'
 					},
 					body: JSON.stringify({
 						amount : amount,
@@ -292,7 +306,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				await fetch(process.env.BACKEND_URL + 'api/cart/' + id, {
 					method: 'DELETE',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin':'*'
 					}
 				})
 				.then( response => response.json())
@@ -303,6 +318,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				fetch(process.env.BACKEND_URL + 'api/order', {
 					headers: {
 						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin':'*',
 						'Authorization': `Bearer ${token}`
 					},
 				})
@@ -313,6 +329,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				fetch(process.env.BACKEND_URL + 'api/all_order', {
 					headers: {
 						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin':'*',
 						'Authorization': `Bearer ${token}`
 					},
 				})
@@ -324,7 +341,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				await fetch(process.env.BACKEND_URL + 'api/order/'+ id, {
 					method: 'PUT',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin':'*'
 					},
 					body: JSON.stringify(updatedOrder)
 				})
@@ -338,7 +356,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				await fetch(process.env.BACKEND_URL + 'api/order', {
 					method: 'POST',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin':'*'
 					},
 					body: JSON.stringify(order) 
 				})
@@ -351,7 +370,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				await fetch(process.env.BACKEND_URL + 'api/order/' + id, {
 					method: 'DELETE',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin':'*'
 					}
 				})
 				.then( response => response.json())

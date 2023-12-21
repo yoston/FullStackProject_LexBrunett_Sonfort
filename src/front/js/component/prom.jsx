@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import frutas from "../../img/traje1.jpg"
-import pan from "../../img/traje1.jpg"
+import traje1 from "../../img/traje1.jpg"
 
 export const Prom = () => {
     return(

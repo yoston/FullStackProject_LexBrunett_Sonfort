@@ -25,7 +25,6 @@ const injectContext = PassedComponent => {
 			//state.actions.validar()
 			state.actions.getList();	
 			state.actions.getCategories();
-			state.actions.getLatLng();
 			state.store.auth ? state.actions.getCart() : null;
 		}, []);
 
