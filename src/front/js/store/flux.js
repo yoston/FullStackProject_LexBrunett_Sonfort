@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getStorage , ref , uploadBytes , getDownloadURL , deleteObject } from "firebase/storage";
 import { v4 } from 'uuid';
+import { getAnalytics } from "firebase/analytics";
 
 /* const firebaseConfig = {
 
@@ -26,6 +27,7 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig);
 export const storage = getStorage(app);
+const analytics = getAnalytics(app);
 
 const getState = ({ getStore, getActions, setStore }) => {
   
