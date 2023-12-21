@@ -191,7 +191,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				fetch(process.env.BACKEND_URL + 'api/products', 
 				{
 					headers: {
-						
+						'Content-Type': 'application/json',
 						'Access-Control-Allow-Origin':'*'
 					},
 				})

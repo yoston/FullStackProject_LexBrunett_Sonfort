@@ -47,7 +47,7 @@ export const User_login = () => {
                     Aun no tienes cuenta? 
                     <div data-bs-dismiss="modal" aria-label="Close" style={{color:"#0aad0a", textDecoration: "none"}}>
                         <b onClick={() => setRedirect(true)}>Registrate</b>
-                        {redirect? <Navigate to="/crear_restaurantes" /> : null}
+                        {redirect? <Navigate to="/user_registration" /> : null}
                     </div>
                 </div>
             </div>

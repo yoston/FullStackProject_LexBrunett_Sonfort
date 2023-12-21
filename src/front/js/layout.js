@@ -56,9 +56,11 @@ const Layout = () => {
                         <div className="col-9" style={{minWidth: store.user === "admin" ? "60%" : "85%", margin:"auto"}}>
                             <Routes> 
                                 <Route element={<Home />} path="/" />
+
                                 <Route element={<Categorias />} path="/categorias" />
                                 <Route element={<Crear_categorias />} path="/crear_categorias" />
                                 <Route element={<Modificar_categorias />} path="/modificar_categorias/:theid" />
+                                <Route element={<User_registration />} path="/user_registration" />
                                 <Route element={<Products />} path="/products" />
                                 <Route element={<Create_productos />} path="/create" />
                                 <Route element={<Modificar_productos />} path="/modificar/:id" />
@@ -77,7 +79,7 @@ const Layout = () => {
                                 <Route element={<Home_admin />} path="/home_user" />
                                 <Route element={<h1>Not found!</h1>} />
                             </Routes>
-                            {store.auth && store.user == "restaurant" ? 
+                            {store.auth && store.user == "user" ? 
                                 <Icono/>
                             : null }
                         </div>
