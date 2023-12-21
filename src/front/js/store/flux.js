@@ -2,13 +2,26 @@ import { initializeApp } from "firebase/app";
 import { getStorage , ref , uploadBytes , getDownloadURL , deleteObject } from "firebase/storage";
 import { v4 } from 'uuid';
 
-const firebaseConfig = {
+/* const firebaseConfig = {
+
   apiKey: process.env.API_KEY,
   authDomain: process.env.AUTHDOMAIN,
   projectId: process.env.PROJECTID,
   storageBucket: process.env.STORAGEBUCKET,
   messagingSenderId: process.env.MESSAGINGSENDERID,
   appId: process.env.APPID
+}; */
+
+//const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG)
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDSBh1QQAFrXNhHBZjxrPBaoCnS6FwsjEs",
+  authDomain: "sonfort-623bb.firebaseapp.com",
+  projectId: "sonfort-623bb",
+  storageBucket: "sonfort-623bb.appspot.com",
+  messagingSenderId: "1018044863257",
+  appId: "1:1018044863257:web:51c90cd6e49ea26dcbeb88",
+  measurementId: "G-X94FGL5BRV"
 };
 
 export const app = initializeApp(firebaseConfig);
