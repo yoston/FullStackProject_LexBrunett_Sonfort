@@ -156,18 +156,18 @@ const getState = ({ getStore, getActions, setStore }) => {
 				setStore({user : "null"})
 				getActions().getCart()
 			},
-			postRegister: (user) => {
-				fetch(process.env.BACKEND_URL + "api/user", {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*'
-					},
-					body: JSON.stringify(user)
-				})
-				.then((response)=> response.json())
-				.then((data)=> console.log(data))
-			},
+				postRegister: (user) => {
+					fetch(process.env.BACKEND_URL + "api/user", {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin':'*'
+						},
+						body: JSON.stringify(user)
+					})
+					.then((response)=> response.json())
+					.then((data)=> console.log(data))
+				},
 			getCategories: async() => {
 				const response = await fetch(process.env.BACKEND_URL + 'api/category')
 				const body = await response.json();

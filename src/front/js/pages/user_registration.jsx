@@ -9,7 +9,8 @@ export const User_registration = () => {
     const [password, setPassword] = useState("");
     const [name_contact, setNameContacto] = useState("");
     const [num_contact, setNumContacto] = useState("");
-    const [create , setCreate] = useState(false)
+    const [create, setCreate] = useState(false);
+    const [error, setError] = useState(null);
 
     const isFormValid = name && name_contact && num_contact;
 
@@ -24,15 +25,16 @@ export const User_registration = () => {
                 num_contact: num_contact
             };
 
-            await actions.post_usuario(usuario);
-            setCreate(true)
+            await actions.postRegister(usuario);
+            setCreate(true);
         } catch (error) {
-            console.error(error)
+            console.error("Error al registrar el usuario:", error);
+            setError("Error al registrar el usuario. Por favor, inténtalo de nuevo.");
         }
-    }
+    };
 
     return (
-        <div className="card container mt-3" style={{width: "20rem"}}>
+        <div className="card container mt-3" style={{ width: "20rem" }}>
             <div className="card-body">
                 <h1><b>Registra tu Usuario</b></h1>
                 <form>
