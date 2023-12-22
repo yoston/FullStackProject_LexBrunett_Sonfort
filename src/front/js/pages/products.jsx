@@ -29,7 +29,7 @@ export const Products = () => {
               {store.products.map((item) => (
                 <tr style={{}}>
                   <td className="td" style={{paddingLeft:"30px"}}><img width="40" height="40" src={item.url_img} alt="Imagen Seleccionada" /></td>
-                  <td className="td"><b style={{color:"#0aad0a"}}>{item.name}</b></td>
+                  <td className="td"><b style={{color:"#800080"}}>{item.name}</b></td>
                   <td className="td">{item.category_info.name}</td>
                   <td className="td">{item.price}</td>
                   <td className="td">
@@ -61,7 +61,7 @@ export const Products = () => {
             </tbody>
           </table>
           <Link to="/create">
-            <button onClick={() => actions.setSelectOpcion(5)} className="btn btn-success" type="submit" data-bs-dismiss="modal" aria-label="Close" style={{borderRadius:"8px" ,backgroundColor:"#0aad0a"}}><b>Nuevo Producto</b></button>
+            <button onClick={() => actions.setSelectOpcion(5)} className="btn btn-success" type="submit" data-bs-dismiss="modal" aria-label="Close" style={{borderRadius:"8px" ,backgroundColor:"#800080"}}><b>Nuevo Producto</b></button>
           </Link>
         </div>
       </div>

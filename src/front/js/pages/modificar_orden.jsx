@@ -38,7 +38,7 @@ export const Modificar_orden = () => {
                             <option value="Cancelada">Cancelada</option>
                         </select>
                         <Link to='/all_ordenes' className="col">
-                            <button disabled={!isFormValid} onClick={() => modificar()} className="btn btn-success" style={{borderRadius:"8px" ,backgroundColor:"#0aad0a", height:"39px"}}> Modificar </button>
+                            <button disabled={!isFormValid} onClick={() => modificar()} className="btn btn-success" style={{borderRadius:"8px" ,backgroundColor:"#800080", height:"39px"}}> Modificar </button>
                         </Link>
                     </div>
                 </div>

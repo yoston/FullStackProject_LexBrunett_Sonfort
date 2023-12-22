@@ -98,7 +98,7 @@ export const Modificar_productos = () => {
                     </div>
                     
                     <div style={{display:"flex", justifyContent:"end", marginTop: "10px"}}>
-                        <button className="btn btn-success" disabled={ !isFormValid } onClick={handleSubmit} style={{borderRadius:"8px" ,backgroundColor:"#0aad0a"}}><b>Guardar Cambios</b></button>
+                        <button className="btn btn-success" disabled={ !isFormValid } onClick={handleSubmit} style={{borderRadius:"8px" ,backgroundColor:"#800080"}}><b>Guardar Cambios</b></button>
                         {create ? <Navigate to='/products' /> : null}
                     </div>
                 </div>

@@ -62,7 +62,7 @@ export const Modificar_categorias = () => {
                 </div>     
 
                 <div className="pt-3" style={{display:"flex", justifyContent:"end"}}>
-                    <button className="btn btn-success" style={{borderRadius:"8px" ,backgroundColor:"#0aad0a"}} disabled={!isFormValid} onClick={guardar}><b>Guardar Cambios</b></button>
+                    <button className="btn btn-success" style={{borderRadius:"8px" ,backgroundColor:"#800080"}} disabled={!isFormValid} onClick={guardar}><b>Guardar Cambios</b></button>
                     {create ? <Navigate to='/categorias' /> : null}
                 </div>
             </div>
