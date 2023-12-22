@@ -22,8 +22,8 @@ def post_user():
     
     new_user = User(
         email=body['email'],
-        password=body["password"]
-        name_contact=body["name_contact"]
+        password=body["password"],
+        name_contact=body["name_contact"],
         num_contact=body["num_contact"]
     )
 
