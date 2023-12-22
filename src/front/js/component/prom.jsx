@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import traje1 from "../../img/traje1.jpg"
+import traje2 from "../../img/traje2.jpg"
 
 export const Prom = () => {
     return(
@@ -31,7 +32,7 @@ export const Prom = () => {
                     <div>
                     <div className="py-10 px-8 rounded" style={{
                         height: "200px",
-                        backgroundImage: `url(${traje1})`,
+                        backgroundImage: `url(${traje2})`,
                         backgroundSize: "cover", 
                         backgroundPosition: "center",
                         padding: "48px 28px"

@@ -95,7 +95,7 @@ export const Carrito = () => {
                                                 <div className="mt-2 small lh-1">
                                                     <a onClick={()=> actions.deleteCart(item.id)} className="text-decoration-none text-inherit">
                                                         <span className="me-1 align-text-bottom">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-trash-2 text-success">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#800080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-trash-2 text-success">
                                                                 <polyline points="3 6 5 6 21 6"></polyline>
                                                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                                                                 <line x1="10" y1="11" x2="10" y2="17"></line>
@@ -129,13 +129,13 @@ export const Carrito = () => {
                             <li className="d-flex justify-content-end py-3 px-4 ps-0 border-top">
                                 <div className="d-flex justify-content-around">
                                     <div className="px-3"><b>Total</b></div>
-                                    <div className="px-3" style={{color:"#0aad0a"}}><b>$ {total}</b></div>
+                                    <div className="px-3" style={{color:"#800080"}}><b>$ {total}</b></div>
                                 </div>
                             </li>
                     </ul>
                 
                     <div className="d-flex justify-content-between mt-4">
-                        <button className="btn btn-primary" data-bs-dismiss="offcanvas" aria-label="Close" style={{backgroundColor:"#0aad0a", borderRadius:"8px"}} onClick={() => setRedirect(true) }><b>Continuar</b></button>
+                        <button className="btn btn-primary" data-bs-dismiss="offcanvas" aria-label="Close" style={{backgroundColor:"#800080", borderRadius:"8px"}} onClick={() => setRedirect(true) }><b>Continuar</b></button>
                         { redirect ? <Navigate to="/resumen" /> : null}
                     </div>
                 </div>

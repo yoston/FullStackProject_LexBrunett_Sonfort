@@ -27,7 +27,7 @@ export const Categorias = () => {
               {store.categories.map((item) => (
                 <tr style={{}}>
                   <td className="td" style={{paddingLeft:"30px"}}><img width="40" height="40" src={item.url_img} alt="Imagen Seleccionada" /></td>
-                  <td className="td"><b style={{color:"#0aad0a"}}>{item.name}</b></td>
+                  <td className="td"><b style={{color:"#800080"}}>{item.name}</b></td>
                   <td className="td">
                     <div className="dropdown">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-three-dots-vertical dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" viewBox="0 0 16 16">
@@ -58,7 +58,7 @@ export const Categorias = () => {
           </table>
           <div>
             <Link to="/crear_categorias">
-              <button onClick={() => actions.setSelectOpcion(5)} className="btn btn-success" style={{borderRadius:"8px" ,backgroundColor:"#0aad0a"}}><b>Nueva Categoria</b></button>
+              <button onClick={() => actions.setSelectOpcion(5)} className="btn btn-success" style={{borderRadius:"8px" ,backgroundColor:"#800080"}}><b>Nueva Categoria</b></button>
             </Link>
           </div>
         </div>

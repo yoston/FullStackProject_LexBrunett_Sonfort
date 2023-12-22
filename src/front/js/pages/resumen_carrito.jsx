@@ -71,16 +71,16 @@ export const Resumen = () => {
                     <div className="d-flex justify-content-end py-3 px-0">
                         <div className="d-flex justify-content-around">
                             <div className="px-3"><b>Total</b></div>
-                            <div className="mx-3" style={{color:"#0aad0a", width:"120px"}}><b>$ {total}</b></div>
+                            <div className="mx-3" style={{color:"#800080", width:"120px"}}><b>$ {total}</b></div>
                         </div>
                     </div>
                     {total > 0 ? 
                     <Link className="d-flex justify-content-end" to="/select_sucursal"  style={{padding:"20px", paddingBottom:"0px", textDecoration:"none"}}>
-                        <button type="button" className="btn btn-success" style={{backgroundColor:"#0aad0a"}}>Continuar</button>
+                        <button type="button" className="btn btn-success" style={{backgroundColor:"#800080"}}>Continuar</button>
                     </Link> 
                     :
                     <div className="d-flex justify-content-end" style={{padding:"20px", paddingBottom:"0px"}}>
-                        <button type="button" className="btn btn-success" disabled={total <= 0} style={{backgroundColor:"#0aad0a"}}>Continuar</button>
+                        <button type="button" className="btn btn-success" disabled={total <= 0} style={{backgroundColor:"#800080"}}>Continuar</button>
                     </div> 
                     }
                 </div>

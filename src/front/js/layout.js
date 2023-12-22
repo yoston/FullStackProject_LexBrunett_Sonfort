@@ -49,7 +49,7 @@ const Layout = () => {
                     <Navbar />
                     <div className="row p-0">
                         { store.user == "admin" ? 
-                            <div className="col-3" style={{borderRight:"1px dashed #0aad0a", minHeight:"100vh", paddingLeft:"10px"}}>
+                            <div className="col-3" style={{borderRight:"1px dashed #800080", minHeight:"100vh", paddingLeft:"10px"}}>
                                 <Navbar_user/>
                             </div>
                         : null}

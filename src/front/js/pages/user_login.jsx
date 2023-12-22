@@ -40,12 +40,12 @@ export const User_login = () => {
                             <label htmlFor="inputPassword1" className="form-label"><b>Contraseña</b></label>
                             <input type="password" className="form-control" id="inputPassword1" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Ingresa tu Contraseña" />
                         </div>
-                        <button className="btn btn-success" type="submit" data-bs-dismiss="modal" aria-label="Close" style={{borderRadius:"8px" ,backgroundColor:"#0aad0a"}}><b>Loguear</b></button>
+                        <button className="btn btn-success" type="submit" data-bs-dismiss="modal" aria-label="Close" style={{borderRadius:"8px" ,backgroundColor:"#800080"}}><b>Loguear</b></button>
                     </form>
                 </div>
                 <div className="modal-footer border-0 justify-content-center">
                     Aun no tienes cuenta? 
-                    <div data-bs-dismiss="modal" aria-label="Close" style={{color:"#0aad0a", textDecoration: "none"}}>
+                    <div data-bs-dismiss="modal" aria-label="Close" style={{color:"#800080", textDecoration: "none"}}>
                         <b onClick={() => setRedirect(true)}>Registrate</b>
                         {redirect? <Navigate to="/user_registration" /> : null}
                     </div>

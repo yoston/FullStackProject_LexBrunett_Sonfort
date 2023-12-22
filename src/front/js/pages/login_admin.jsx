@@ -48,14 +48,14 @@ export const Admin_login = () => {
                             </div> 
                         : null }
                         <div>
-                            <button className="btn btn-success" type="submit" style={{borderRadius:"8px" ,backgroundColor:"#0aad0a"}}>Login</button>
+                            <button className="btn btn-success" type="submit" style={{borderRadius:"8px" ,backgroundColor:"#800080"}}>Login</button>
                             { home && store.auth ? <Navigate to="/home_user" /> : null}
                         </div>
                     </form>
                 </div>
                 <div className="modal-footer border-0 justify-content-center">
                     Aun no tienes cuenta? 
-                    <div data-bs-dismiss="modal" aria-label="Close" style={{color:"#0aad0a", textDecoration: "none"}}>
+                    <div data-bs-dismiss="modal" aria-label="Close" style={{color:"#800080", textDecoration: "none"}}>
                         <b onClick={() => setRedirect(true)}>Registrate</b>
                         {redirect ? <Navigate to="/crear_admin" /> : null}
                     </div>

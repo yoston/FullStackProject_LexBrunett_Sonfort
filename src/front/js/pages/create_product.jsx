@@ -96,7 +96,7 @@ export const Create_productos = () => {
                     </div>
                     
                     <div style={{display:"flex", justifyContent:"end", marginTop: "10px"}}>
-                        <button className="btn btn-success" disabled={ !isFormValid } onClick={handleSubmit} style={{borderRadius:"8px" ,backgroundColor:"#0aad0a"}}><b>Crear Producto</b></button>
+                        <button className="btn btn-success" disabled={ !isFormValid } onClick={handleSubmit} style={{borderRadius:"8px" ,backgroundColor:"#800080"}}><b>Crear Producto</b></button>
                         {create ? <Navigate to='/products' /> : null}
                     </div>
                 </div>

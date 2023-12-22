@@ -53,8 +53,10 @@ export const User_registration = () => {
                         <input type="text" className="form-control" id="num_contacto" value={num_contact} onChange={(e) => setNumContacto(e.target.value)} />
                     </div>
                     
-                    <button disabled={!isFormValid} onClick={handleSubmit} className="btn btn-success my-2" style={{backgroundColor: "#0aad0a"}}>Guardar Cambios</button>
-                    {create ? <Navigate to='/' /> : null}
+                    <button disabled={!isFormValid} onClick={handleSubmit} className="btn btn-success my-2" style={{backgroundColor: "#800080"}}>
+  Guardar Cambios
+</button>
+{create && <Navigate to='/' />}
                 </form>
             </div>
         </div>

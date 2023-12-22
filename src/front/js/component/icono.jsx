@@ -22,7 +22,7 @@ console.log("User type:", typeof store.user);
             <img width="60px" height="60px" src={logo} data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" style={{
                 padding:"10px",
                 backgroundColor:"white",
-                border:"5px solid #0aad0a",
+                border:"5px solid #800080",
                 borderRadius:"50px",
                 zIndex: "10"
             }}/>
