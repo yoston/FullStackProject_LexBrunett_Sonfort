@@ -8,6 +8,8 @@ class User (db.Model):
     email = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(20), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=True)
+    name_contact = db.Column(db.String(80), unique=True, nullable=False)
+    num_contact = db.Column(db.String(10), unique=False, nullable=False)
 
     def __repr__(self):
         return f'<User {self.email}>'
@@ -16,6 +18,8 @@ class User (db.Model):
         return {
             "id": self.id,
             "email": self.email,
+            "name_contact":self.name_contact,
+            "num_contact":self.num_contact
         }
 
 class Product (db.Model):

@@ -16,11 +16,9 @@ export const Prom = () => {
                         padding: "48px 28px"
                     }}>
                         <div>
-                            <h3 className="fw-bold mb-1">Traje de personaje de anime &amp; Vegetales</h3>
+                            <h3 className="fw-bold mb-1">Traje de personaje de anime &amp; Comics </h3>
                             <p className="mb-4">
-                                Hasta
-                                <span className="fw-bold"> 38% </span>
-                                de descuento
+                                Hasta<span className="fw-bold"> 38% de descuento</span> 
                             </p>
                             <Link to="/lista_por_categorias/19">
                                 <button href="#!" className="btn btn-dark">Comprar ahora</button>

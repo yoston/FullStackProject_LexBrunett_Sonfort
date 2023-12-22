@@ -7,8 +7,6 @@ export const User_registration = () => {
 
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
-    const [tipo, setTipo] = useState("");
-    const [description, setDescription] = useState("");
     const [name_contact, setNameContacto] = useState("");
     const [num_contact, setNumContacto] = useState("");
     const [create , setCreate] = useState(false)
@@ -22,13 +20,11 @@ export const User_registration = () => {
             const restaurant = {
                 name: name,
                 password: password,
-                type: tipo,
-                description: description,
                 name_contact: name_contact,
                 num_contact: num_contact
             };
 
-            await actions.postRestaurants (restaurant);
+            await actions.post_user (restaurant);
             setCreate(true)
         } catch (error) {
             console.error(error)
@@ -38,7 +34,7 @@ export const User_registration = () => {
     return (
         <div className="card container mt-3" style={{width: "20rem"}}>
             <div className="card-body">
-                <h1><b>Registra tu Restaurante</b></h1>
+                <h1><b>Registra tu Usuario</b></h1>
                 <form>
                     <div className="mb-3">
                         <label htmlFor="name" className="form-label">Name</label>
@@ -49,24 +45,11 @@ export const User_registration = () => {
                         <input type="password" className="form-control" id="inputPassword1" value={password} onChange={(e) => setPassword(e.target.value)} />
                     </div>
                     <div className="mb-3">
-                        <label htmlFor="tipo" className="form-label">Tipo</label>
-                        <select id="tipo" className="form-select" value={tipo} onChange={(e) => setTipo(e.target.value)}>
-                        <option selected>Open this select menu</option>
-                        <option value="Comida China">Comida China</option>
-                        <option value="Asadero">Asadero</option>
-                        <option value="Gourmet">Gourmet</option>
-                    </select>
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="Descripcion" className="form-label">Descripcion</label>
-                        <input type="text" className="form-control" id="Descripcion" value={description} onChange={(e) => setDescription(e.target.value)} />
-                    </div>
-                    <div className="mb-3">
                         <label htmlFor="name_contacto" className="form-label">Nombre de Contacto</label>
                         <input type="text" className="form-control" id="name_contacto" value={name_contact} onChange={(e) => setNameContacto(e.target.value)} />
                     </div>
                     <div className="mb-3">
-                        <label htmlFor="num_contacto" className="form-label">Numeero de Contacto</label>
+                        <label htmlFor="num_contacto" className="form-label">Numero de Contacto</label>
                         <input type="text" className="form-control" id="num_contacto" value={num_contact} onChange={(e) => setNumContacto(e.target.value)} />
                     </div>
                     

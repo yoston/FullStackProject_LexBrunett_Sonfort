@@ -23,6 +23,8 @@ def post_user():
     new_user = User(
         email=body['email'],
         password=body["password"]
+        name_contact=body["name_contact"]
+        num_contact=body["num_contact"]
     )
 
     db.session.add(new_user)
@@ -39,6 +41,8 @@ def put_user(id):
     body = request.json
     user.email = body['email']
     user.password = body['password']
+    user.name_contact=body["name_contact"]
+    user.num_contact=body["num_contact"]
 
     db.session.commit()
 
@@ -59,7 +63,7 @@ def post_login_user():
     name = request.json.get("name", None)
     password = request.json.get("password", None)
     
-    user = Restaurant.query.filter_by(name=name, password=password).first()
+    user = user.query.filter_by(name=name, password=password).first()
     
     if user is None:
         return jsonify({"msg": "Bad username or password"}), 401
