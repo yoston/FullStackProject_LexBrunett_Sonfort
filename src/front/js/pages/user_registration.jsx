@@ -11,20 +11,20 @@ export const User_registration = () => {
     const [num_contact, setNumContacto] = useState("");
     const [create , setCreate] = useState(false)
 
-    const isFormValid = name && tipo && description && name_contact && num_contact;
+    const isFormValid = name && name_contact && num_contact;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            const restaurant = {
+            const usuario = {
                 name: name,
                 password: password,
                 name_contact: name_contact,
                 num_contact: num_contact
             };
 
-            await actions.post_user (restaurant);
+            await actions.post_usuario(usuario);
             setCreate(true)
         } catch (error) {
             console.error(error)

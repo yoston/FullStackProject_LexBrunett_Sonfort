@@ -27,7 +27,6 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig);
 export const storage = getStorage(app);
-const analytics = getAnalytics(app);
 
 const getState = ({ getStore, getActions, setStore }) => {
   
@@ -37,8 +36,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 			products: [],
 			carrito: [],
 			order: [],
-			lat: 4.6556,
-			lng: -74.07,
 			auth: false,
 			user: null,
 			creado: null,
@@ -98,6 +95,33 @@ const getState = ({ getStore, getActions, setStore }) => {
 				})
 				await getActions().getCart()
 			},
+
+			post_usuario: async (obj) => {
+				try {
+					const response = await fetch(process.env.BACKEND_URL + 'api/user_registration', {
+					method: 'POST',
+					headers: {
+					'Content-Type': 'application/json',
+					},
+				body: JSON.stringify(obj),
+				});
+
+			if (!response.ok) {
+			// Manejo de errores para respuestas HTTP no exitosas
+			throw new Error(`Error: ${response.status} - ${response.statusText}`);
+			}
+
+			const data = await response.json();
+			console.log(data);
+
+			// Llamar a la función getUser después de completar la solicitud con éxito
+			await getActions().getUser();
+			} catch (error) {
+			// Manejo de errores generales
+			console.error('Error al realizar la solicitud POST:', error);
+			}
+			},
+			
 			postAdmin: (email,password) => {
 				fetch(process.env.BACKEND_URL + "api/login_admin", {
 					method: 'POST',
