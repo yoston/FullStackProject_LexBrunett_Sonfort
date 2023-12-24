@@ -2,18 +2,46 @@ from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, User, Product, Category, Cart, Order
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
 import re
-from flask import abort
 
 api = Blueprint('api', __name__)
 
-#User
+# Funciones auxiliares
+def validate_email(email):
+    return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
+def handle_user_creation(body):
+    required_fields = ['username', 'email', 'password', 'name_contact', 'num_contact']
+    
+    for field in required_fields:
+        if field not in body:
+            return jsonify({"error": f"Missing required field: {field}"}), 400
+
+    email = body['email']
+    if not validate_email(email):
+        return jsonify({"error": "Invalid email format"}), 400
+
+    existing_user = User.query.filter_by(email=email).first()
+    if existing_user:
+        return jsonify({"error": "User with this email already exists"}), 401
+
+    new_user = User(
+        username=body['username'],
+        email=email,
+        name_contact=body["name_contact"],
+        num_contact=body["num_contact"]
+    )
+    new_user.set_password(body["password"])
+
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({"message": "User created successfully"}), 200
+
+# Rutas de Usuarios
 @api.route('/users', methods=['GET'])
 def get_users():
     try:
         all_users = User.query.all()
-
-        # Serialize user data
         users_serialized = [user.serialize() for user in all_users]
 
         return jsonify(users_serialized), 200
@@ -25,59 +53,27 @@ def get_users():
 def post_user():
     try:
         body = request.json
-
-        # Check if all required fields are present
-        required_fields = ['username', 'email', 'password', 'name_contact', 'num_contact']
-        for field in required_fields:
-            if field not in body:
-                return jsonify({"error": f"Missing required field: {field}"}), 400
-
-        # Validate email format
-        email = body['email']
-        if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-            return jsonify({"error": "Invalid email format"}), 400
-
-        # Check if a user with the same email already exists
-        existing_user = User.query.filter_by(email=email).first()
-        if existing_user:
-            return jsonify({"error": "User with this email already exists"}), 401
-
-        # Create a new user with hashed password
-        new_user = User(
-            username=body['username'],
-            email=email,
-            name_contact=body["name_contact"],
-            num_contact=body["num_contact"]
-        )
-        new_user.set_password(body["password"])
-
-        db.session.add(new_user)
-        db.session.commit()
-
-        return jsonify({"message": "User created successfully"}), 200
+        response = handle_user_creation(body)
+        return response
 
     except Exception as e:
         return jsonify({"error": str(e), "message": "An error occurred while creating the user"}), 500
-
 
 @api.route('/users/<int:id>', methods=['PUT'])
 def put_user(id):
     try:
         user = User.query.get(id)
 
-        # Check if user exists
         if not user:
             return jsonify({"message": "User not found"}), 404
 
         body = request.json
-
-        # Update user properties
         user.username = body.get('username', user.username)
         user.email = body.get('email', user.email)
-        
+                
         # Check if password is present in the request before updating
         if 'password' in body:
-            user.set_password(body['password']) 
+            user.set_password(body['password'])
 
         user.name_contact = body.get('name_contact', user.name_contact)
         user.num_contact = body.get('num_contact', user.num_contact)
@@ -93,7 +89,7 @@ def put_user(id):
 def delete_user(id):
     try:
         user = User.query.get(id)
-
+        
         # Check if user exists
         if not user:
             return jsonify({"message": "User not found"}), 404
@@ -106,8 +102,7 @@ def delete_user(id):
     except Exception as e:
         return jsonify({"error": str(e), "message": "An error occurred while deleting the user"}), 500
 
-
-#logins
+# logins
 
 @api.route("/login", methods=["POST"])
 def post_login():
@@ -133,13 +128,22 @@ def post_login():
         access_token = create_access_token(identity=user.id)
 
         # Return the access token and user information
-        return jsonify({"token": access_token, "user_id": user.id, "username": user.username, "name": user.name}), 200
+        response_data = {
+            "token": access_token,
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "name": user.name,
+            }
+        }
+
+        return jsonify(response_data), 200
 
     except Exception as e:
         # Handle any unexpected exceptions
         return jsonify({"error": str(e), "message": "An error occurred while processing the login"}), 500
 
-#Products
+# Products
 
 @api.route('/products', methods=['GET'])
 def get_products():
@@ -158,17 +162,23 @@ def get_products():
         return jsonify(products_with_category_info), 200
 
     except Exception as e:
-        abort(500, message=f"An error occurred while fetching product data: {str(e)}")
+        return jsonify({"error": str(e), "message": "An error occurred while fetching product data"}), 500
 
 @api.route('/products', methods=['POST'])
 def post_product():
     try:
         data = request.get_json()
 
+        # Check if all required fields are present
         required_fields = ['name', 'description', 'price', 'amount', 'url_img', 'idu_img', 'id_category']
         for field in required_fields:
             if field not in data:
-                abort(400, message=f"Missing required field: {field}")
+                return jsonify({"error": f"Missing required field: {field}"}), 400
+
+        # Validate if the category exists
+        category_id = data['id_category']
+        if not Category.query.get(category_id):
+            return jsonify({"error": f"Category with id {category_id} does not exist"}), 400
 
         new_product = Product(**data)
         db.session.add(new_product)
@@ -177,7 +187,7 @@ def post_product():
         return jsonify({"message": "Product created successfully"}), 200
 
     except Exception as e:
-        abort(500, message=f"An error occurred while creating the product: {str(e)}")
+        return jsonify({"error": str(e), "message": "An error occurred while creating the product"}), 500
 
 @api.route('/products/<int:id>', methods=['PUT'])
 def put_product(id):
@@ -185,14 +195,20 @@ def put_product(id):
         product = Product.query.get_or_404(id)
         data = request.get_json()
 
+        # Update product properties
         for field in ['name', 'description', 'price', 'amount', 'url_img', 'idu_img', 'id_category']:
             setattr(product, field, data.get(field, getattr(product, field)))
+
+        # Validate if the updated category exists
+        category_id = data.get('id_category', product.id_category)
+        if not Category.query.get(category_id):
+            return jsonify({"error": f"Category with id {category_id} does not exist"}), 400
 
         db.session.commit()
         return jsonify({"message": "Product updated successfully"}), 200
 
     except Exception as e:
-        abort(500, message=f"An error occurred while updating the product: {str(e)}")
+        return jsonify({"error": str(e), "message": "An error occurred while updating the product"}), 500
 
 @api.route('/products/<int:id>', methods=['DELETE'])
 def delete_product(id):
@@ -204,9 +220,10 @@ def delete_product(id):
         return jsonify({"message": "Product deleted successfully"}), 200
 
     except Exception as e:
-        abort(500, message=f"An error occurred while deleting the product: {str(e)}")
+        return jsonify({"error": str(e), "message": "An error occurred while deleting the product"}), 500
 
-#Categories
+
+# Categories
 
 @api.route('/categories', methods=['GET'])
 def get_categories():
@@ -217,18 +234,20 @@ def get_categories():
         return jsonify(categories_serialized), 200
 
     except Exception as e:
-        abort(500, message=f"An error occurred while fetching category data: {str(e)}")
+        return jsonify({"error": str(e), "message": "An error occurred while fetching category data"}), 500
 
 @api.route('/categories', methods=['POST'])
 def post_category():
     try:
         data = request.get_json()
 
+        # Check if all required fields are present
         required_fields = ['name', 'url_img', 'idu_img']
         for field in required_fields:
             if field not in data:
-                abort(400, message=f"Missing required field: {field}")
+                return jsonify({"error": f"Missing required field: {field}"}), 400
 
+        # Create a new category
         new_category = Category(**data)
         db.session.add(new_category)
         db.session.commit()
@@ -236,7 +255,7 @@ def post_category():
         return jsonify({"message": "Category created successfully"}), 200
 
     except Exception as e:
-        abort(500, message=f"An error occurred while creating the category: {str(e)}")
+        return jsonify({"error": str(e), "message": "An error occurred while creating the category"}), 500
 
 @api.route('/categories/<int:id>', methods=['PUT'])
 def put_category(id):
@@ -244,6 +263,7 @@ def put_category(id):
         category = Category.query.get_or_404(id)
         data = request.get_json()
 
+        # Update category properties
         for field in ['name', 'url_img', 'idu_img']:
             setattr(category, field, data.get(field, getattr(category, field)))
 
@@ -251,7 +271,7 @@ def put_category(id):
         return jsonify({"message": "Category updated successfully"}), 200
 
     except Exception as e:
-        abort(500, message=f"An error occurred while updating the category: {str(e)}")
+        return jsonify({"error": str(e), "message": "An error occurred while updating the category"}), 500
 
 @api.route('/categories/<int:id>', methods=['DELETE'])
 def delete_category(id):
@@ -263,9 +283,9 @@ def delete_category(id):
         return jsonify({"message": "Category deleted successfully"}), 200
 
     except Exception as e:
-        abort(500, message=f"An error occurred while deleting the category: {str(e)}")
+        return jsonify({"error": str(e), "message": "An error occurred while deleting the category"}), 500
 
-#Cart
+# Cart
 
 @api.route('/cart', methods=['GET'])
 @jwt_required()
@@ -286,7 +306,7 @@ def get_carts():
         return jsonify(cart_with_product_info), 200
 
     except Exception as e:
-        abort(500, message=f"An error occurred while fetching cart data: {str(e)}")
+        return jsonify({"error": str(e), "message": "An error occurred while fetching cart data"}), 500
 
 @api.route('/cart/<int:id>', methods=['PUT'])
 def put_cart(id):
@@ -301,7 +321,7 @@ def put_cart(id):
         return jsonify({"message": "Cart item updated successfully"}), 200
 
     except Exception as e:
-        abort(500, message=f"An error occurred while updating the cart item: {str(e)}")
+        return jsonify({"error": str(e), "message": "An error occurred while updating the cart item"}), 500
 
 @api.route('/cart_add_idOrder/<int:id>', methods=['PUT'])
 def add_order_cart(id):
@@ -316,17 +336,18 @@ def add_order_cart(id):
         return jsonify({"message": "Order added successfully"}), 200
 
     except Exception as e:
-        abort(500, message=f"An error occurred while adding order to the cart item: {str(e)}")
+        return jsonify({"error": str(e), "message": "An error occurred while adding order to the cart item"}), 500
 
 @api.route('/cart', methods=['POST'])
 def post_cart():
     try:
         data = request.get_json()
 
+        # Check if all required fields are present
         required_fields = ['amount', 'id_Product', 'id_Order']
         for field in required_fields:
             if field not in data:
-                abort(400, message=f"Missing required field: {field}")
+                return jsonify({"error": f"Missing required field: {field}"}), 400
 
         existing_cart = Cart.query.filter_by(id_Product=data['id_Product'], id_Order=None).first()
 
@@ -341,7 +362,7 @@ def post_cart():
         return jsonify({"message": "Cart item created or updated successfully"}), 200
 
     except Exception as e:
-        abort(500, message=f"An error occurred while processing the cart item: {str(e)}")
+        return jsonify({"error": str(e), "message": "An error occurred while processing the cart item"}), 500
 
 @api.route('/cart/<int:id>', methods=['DELETE'])
 def delete_cart(id):
@@ -353,9 +374,9 @@ def delete_cart(id):
         return jsonify({"message": "Cart item deleted successfully"}), 200
 
     except Exception as e:
-        abort(500, message=f"An error occurred while deleting the cart item: {str(e)}")
+        return jsonify({"error": str(e), "message": "An error occurred while deleting the cart item"}), 500
 
-#Orders
+# Orders
 
 @api.route('/order', methods=['GET'])
 @jwt_required()
@@ -380,7 +401,7 @@ def get_order():
         return jsonify(orders_with_info), 200
 
     except Exception as e:
-        abort(500, message=f"An error occurred while fetching order data: {str(e)}")
+        return jsonify({"error": str(e), "message": "An error occurred while fetching order data"}), 500
 
 @api.route('/order/<id>', methods=['PUT'])
 def put_order(id):
@@ -395,17 +416,18 @@ def put_order(id):
         return jsonify({"message": "Order updated successfully"}), 200
 
     except Exception as e:
-        abort(500, message=f"An error occurred while updating the order: {str(e)}")
+        return jsonify({"error": str(e), "message": "An error occurred while updating the order"}), 500
 
 @api.route('/order', methods=['POST'])
 def post_order():
     try:
         data = request.get_json()
 
+        # Check if all required fields are present
         required_fields = ['id', 'day_Date', 'month_Date', 'year_Date', 'value']
         for field in required_fields:
             if field not in data:
-                abort(400, message=f"Missing required field: {field}")
+                return jsonify({"error": f"Missing required field: {field}"}), 400
 
         new_order = Order(
             id=data['id'],
@@ -421,7 +443,7 @@ def post_order():
         return jsonify({"message": "Order created successfully"}), 200
 
     except Exception as e:
-        abort(500, message=f"An error occurred while creating the order: {str(e)}")
+        return jsonify({"error": str(e), "message": "An error occurred while creating the order"}), 500
 
 @api.route('/order/<id>', methods=['DELETE'])
 def delete_order(id):
@@ -432,7 +454,7 @@ def delete_order(id):
         return jsonify({"message": "Order deleted successfully"}), 200
 
     except Exception as e:
-        abort(500, message=f"An error occurred while deleting the order: {str(e)}")
+        return jsonify({"error": str(e), "message": "An error occurred while deleting the order"}), 500
 
 @api.route('/all_order', methods=['GET'])
 @jwt_required()
@@ -457,4 +479,4 @@ def get_all_order():
         return jsonify(orders_with_info), 200
 
     except Exception as e:
-        abort(500, message=f"An error occurred while fetching all order data: {str(e)}")
+        return jsonify({"error": str(e), "message": "An error occurred while fetching all order data"}), 500

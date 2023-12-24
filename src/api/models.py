@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask_bcrypt import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
@@ -26,7 +26,7 @@ class User(db.Model):
         }
 
     def set_password(self, password):
-        self.password = generate_password_hash(password, method='sha256')
+        self.password = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
@@ -49,16 +49,21 @@ class Product (db.Model):
         return f'<Product {self.name}>'
 
     def serialize(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "description": self.description,
-            "price": self.price,
-            "amount": self.amount,
-            "url_img": self.url_img,
-            "idu_img": self.idu_img,
-            "id_category": self.id_category
-        }
+            serialized_data = {
+                "id": self.id,
+                "name": self.name,
+                "description": self.description,
+                "price": self.price,
+                "amount": self.amount,
+                "url_img": self.url_img,
+                "idu_img": self.idu_img,
+                "id_category": self.id_category
+            }
+            if self.category:
+                serialized_data['category_info'] = self.category.serialize()
+            return serialized_data
+
+
 class Category (db.Model):
     __tablename__ = 'category'
     id = db.Column(db.Integer, primary_key=True)
@@ -90,7 +95,7 @@ class Order (db.Model):
         return f'<Orden {self.id}>'
 
     def serialize(self):
-        return {
+        serialized_data = {
             "id": self.id,
             "state": self.state,
             "day_Date": self.day_Date,
@@ -98,6 +103,8 @@ class Order (db.Model):
             "year_Date": self.year_Date,
             "value": self.value,
         }
+        return serialized_data
+
 
 class Cart(db.Model):
     __tablename__ = 'cart'
@@ -110,10 +117,14 @@ class Cart(db.Model):
 
     def __repr__(self):
         return f'<Cart {self.id}>'
+
     def serialize(self):
-        return {
-            "id": self.id,
-            "amount": self.amount,
-            "id_Product": self.id_Product,
-            "id_Order": self.id_Order
-        }
+            serialized_data = {
+                "id": self.id,
+                "amount": self.amount,
+                "id_Product": self.id_Product,
+                "id_Order": self.id_Order
+            }
+            if self.product:
+                serialized_data['product_info'] = self.product.serialize()
+            return serialized_data
