@@ -5,6 +5,7 @@ db = SQLAlchemy()
 class User (db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(20), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=True)
@@ -18,6 +19,7 @@ class User (db.Model):
         return {
             "id": self.id,
             "email": self.email,
+            "username":self.username,
             "name_contact":self.name_contact,
             "num_contact":self.num_contact
         }
@@ -32,7 +34,8 @@ class Product (db.Model):
     url_img = db.Column(db.String(250), unique=False, nullable=True)
     idu_img = db.Column(db.String(250), unique=False, nullable=True)
     id_category = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
-    category = db.relationship('Category')
+    category = db.relationship('Category', backref='products')  # Corrected line
+
 
     def __repr__(self):
         return f'<Product {self.name}>'
