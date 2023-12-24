@@ -1,12 +1,15 @@
 from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, User, Product, Category, Cart, Order
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
-
+import re
+from flask import abort
 
 api = Blueprint('api', __name__)
 
-@api.route('/user', methods=['GET'])
-def get_user():
+#User
+
+@api.route('/users', methods=['GET'])
+def get_users():
     try:
         all_users = User.query.all()
 
@@ -18,32 +21,46 @@ def get_user():
     except Exception as e:
         return jsonify({"error": str(e), "message": "An error occurred while fetching user data"}), 500
 
-
-@api.route("/user", methods=["POST"])
+@api.route("/users", methods=["POST"])
 def post_user():
-    body = request.json
-    user = User.query.filter_by(email=body['email']).first()
+    try:
+        body = request.json
 
-    if user:
-        return jsonify({"msg": "User already exists"}), 401
+        # Check if all required fields are present
+        required_fields = ['username', 'email', 'password', 'name_contact', 'num_contact']
+        for field in required_fields:
+            if field not in body:
+                return jsonify({"error": f"Missing required field: {field}"}), 400
 
-    new_user = User(
-        username=body['username'],
-        email=body['email'],
-        password=body["password"],
-        name_contact=body["name_contact"],
-        num_contact=body["num_contact"]
-    )
+        # Validate email format
+        email = body['email']
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            return jsonify({"error": "Invalid email format"}), 400
 
-    db.session.add(new_user)
-    db.session.commit()
-    return jsonify({"msg": "User created successfully"}), 200
+        # Check if a user with the same email already exists
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            return jsonify({"error": "User with this email already exists"}), 401
 
-    db.session.add(new_user)
-    db.session.commit()
-    return jsonify({"msg" : "Usuario creado"}) , 200
+        # Create a new user with hashed password
+        new_user = User(
+            username=body['username'],
+            email=email,
+            name_contact=body["name_contact"],
+            num_contact=body["num_contact"]
+        )
+        new_user.set_password(body["password"])
 
-@api.route('/user/<int:id>', methods=['PUT'])
+        db.session.add(new_user)
+        db.session.commit()
+
+        return jsonify({"message": "User created successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e), "message": "An error occurred while creating the user"}), 500
+
+
+@api.route('/users/<int:id>', methods=['PUT'])
 def put_user(id):
     try:
         user = User.query.get(id)
@@ -57,7 +74,11 @@ def put_user(id):
         # Update user properties
         user.username = body.get('username', user.username)
         user.email = body.get('email', user.email)
-        user.password = body.get('password', user.password)
+        
+        # Check if password is present in the request before updating
+        if 'password' in body:
+            user.set_password(body['password']) 
+
         user.name_contact = body.get('name_contact', user.name_contact)
         user.num_contact = body.get('num_contact', user.num_contact)
 
@@ -68,7 +89,7 @@ def put_user(id):
     except Exception as e:
         return jsonify({"error": str(e), "message": "An error occurred while updating the user"}), 500
 
-@api.route('/user/<int:id>', methods=['DELETE'])
+@api.route('/users/<int:id>', methods=['DELETE'])
 def delete_user(id):
     try:
         user = User.query.get(id)
@@ -86,383 +107,354 @@ def delete_user(id):
         return jsonify({"error": str(e), "message": "An error occurred while deleting the user"}), 500
 
 
-# Error handling in a route
-@api.route("/login_user", methods=["POST"])
-def post_login_user():
-    try:
-        username = request.json.get("name", None)
-        password = request.json.get("password", None)
-        
-        user = User.query.filter_by(username=username, password=password).first()
+#logins
 
-        if user is None:
-            return jsonify({"error": "Invalid credentials", "message": "Bad username or password"}), 401
-
-        access_token = create_access_token(identity=user.id)
-        return jsonify({ "token": access_token, "user_id": user.id, "name": user.name}), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e), "message": "An error occurred during login"}), 500
-
-@api.route("/login_admin", methods=["POST"])
-def post_login_admin():
+@api.route("/login", methods=["POST"])
+def post_login():
     try:
         # Retrieve user credentials from the request JSON
         email = request.json.get("email", None)
         password = request.json.get("password", None)
 
-        # Check if both email and password are provided
+        # Check if both username/email and password are provided
         if not email or not password:
-            return jsonify({"error": "Invalid input", "message": "Email and password are required"}), 400
+            return jsonify({"error": "Invalid input", "message": "Username/Email and password are required"}), 400
 
-        # Query the database to find the user by email and password
-        user = User.query.filter_by(email=email, password=password).first()
+        # Query the database to find the user by username or email
+        user = User.query.filter(
+            (User.username == email) | (User.email == email)
+        ).first()
 
-        # Check if the user is not found
-        if user is None:
-            return jsonify({"error": "Invalid credentials", "message": "Bad email or password"}), 401
-
+        # Check if the user is not found or the password is incorrect
+        if user is None or not user.check_password(password):
+            return jsonify({"error": "Invalid credentials", "message": "Invalid username/email or password"}), 401
+        
         # Generate an access token
         access_token = create_access_token(identity=user.id)
 
         # Return the access token and user information
-        return jsonify({"token": access_token, "user_id": user.id, "user": "admin"}), 200
+        return jsonify({"token": access_token, "user_id": user.id, "username": user.username, "name": user.name}), 200
 
     except Exception as e:
         # Handle any unexpected exceptions
         return jsonify({"error": str(e), "message": "An error occurred while processing the login"}), 500
 
+#Products
 
 @api.route('/products', methods=['GET'])
 def get_products():
-    all_products = Product.query.all()
-    products_serialize = [product.serialize() for product in all_products]
-    product_with_product_info = []
+    try:
+        all_products = Product.query.all()
+        products_serialized = [product.serialize() for product in all_products]
 
-    for item in products_serialize:
-        category_id = item["id_category"]
-        category = Category.query.get(category_id)
-        
-        if category:
-            item['category_info'] = category.serialize()
-            product_with_product_info.append(item)
+        # Enhance product data with category information
+        products_with_category_info = []
+        for product in products_serialized:
+            category = Category.query.get(product["id_category"])
+            if category:
+                product['category_info'] = category.serialize()
+                products_with_category_info.append(product)
 
-    return jsonify(products_serialize), 200
+        return jsonify(products_with_category_info), 200
+
+    except Exception as e:
+        abort(500, message=f"An error occurred while fetching product data: {str(e)}")
 
 @api.route('/products', methods=['POST'])
 def post_product():
     try:
-        body = request.json
+        data = request.get_json()
 
-        # Validate that required fields are present in the request
         required_fields = ['name', 'description', 'price', 'amount', 'url_img', 'idu_img', 'id_category']
         for field in required_fields:
-            if field not in body:
-                return jsonify({"error": f"Missing required field: {field}"}), 400
+            if field not in data:
+                abort(400, message=f"Missing required field: {field}")
 
-        new_product = Product(
-            name=body['name'],
-            description=body['description'],
-            price=body['price'],
-            amount=body['amount'],
-            url_img=body['url_img'],
-            idu_img=body['idu_img'],
-            id_category=body['id_category']
-        )
-
+        new_product = Product(**data)
         db.session.add(new_product)
         db.session.commit()
 
         return jsonify({"message": "Product created successfully"}), 200
 
     except Exception as e:
-        return jsonify({"error": str(e), "message": "An error occurred while creating the product"}), 500
-
+        abort(500, message=f"An error occurred while creating the product: {str(e)}")
 
 @api.route('/products/<int:id>', methods=['PUT'])
 def put_product(id):
-    product = Product.query.get(id)
+    try:
+        product = Product.query.get_or_404(id)
+        data = request.get_json()
 
-    if not product:
-        return jsonify({"message": "Producto no encontrado"}), 404
-    
-    body = request.json
-    product.name = body['name']
-    product.description = body['description']
-    product.price = body['price']
-    product.amount = body['amount']
-    product.url_img = body['url']
-    product.idu_img = body['idu']
-    product.id_category = body['id_category']
-    db.session.commit()
+        for field in ['name', 'description', 'price', 'amount', 'url_img', 'idu_img', 'id_category']:
+            setattr(product, field, data.get(field, getattr(product, field)))
 
-    return jsonify({"message": "Producto modificado con éxito"}), 200
+        db.session.commit()
+        return jsonify({"message": "Product updated successfully"}), 200
+
+    except Exception as e:
+        abort(500, message=f"An error occurred while updating the product: {str(e)}")
 
 @api.route('/products/<int:id>', methods=['DELETE'])
 def delete_product(id):
-    product = Product.query.get(id)
-
-    if not product:
-        return jsonify({"message": "Producto no encontrado"}), 404
-    
-    db.session.delete(product)
-    db.session.commit()
-
-    return jsonify({"message": "Producto eliminado con éxito"}), 200
-
-@api.route('/category', methods=['GET'])
-def get_categories():
-    all_categories = Category.query.all()
-    categories_serialize = [Category.serialize() for Categories in all_categories]
-
-    return jsonify(categories_serialize), 200
-
-@api.route('/category', methods=['POST'])
-def post_categories():
     try:
-        body = request.json
+        product = Product.query.get_or_404(id)
+        db.session.delete(product)
+        db.session.commit()
 
-        # Validate that required fields are present in the request
+        return jsonify({"message": "Product deleted successfully"}), 200
+
+    except Exception as e:
+        abort(500, message=f"An error occurred while deleting the product: {str(e)}")
+
+#Categories
+
+@api.route('/categories', methods=['GET'])
+def get_categories():
+    try:
+        all_categories = Category.query.all()
+        categories_serialized = [category.serialize() for category in all_categories]
+
+        return jsonify(categories_serialized), 200
+
+    except Exception as e:
+        abort(500, message=f"An error occurred while fetching category data: {str(e)}")
+
+@api.route('/categories', methods=['POST'])
+def post_category():
+    try:
+        data = request.get_json()
+
         required_fields = ['name', 'url_img', 'idu_img']
         for field in required_fields:
-            if field not in body:
-                return jsonify({"error": f"Missing required field: {field}"}), 400
+            if field not in data:
+                abort(400, message=f"Missing required field: {field}")
 
-        new_category = Category(
-            name=body['name'],
-            url_img=body['url_img'],
-            idu_img=body['idu_img']
-        )
-
+        new_category = Category(**data)
         db.session.add(new_category)
         db.session.commit()
 
         return jsonify({"message": "Category created successfully"}), 200
 
     except Exception as e:
-        return jsonify({"error": str(e), "message": "An error occurred while creating the category"}), 500
+        abort(500, message=f"An error occurred while creating the category: {str(e)}")
 
+@api.route('/categories/<int:id>', methods=['PUT'])
+def put_category(id):
+    try:
+        category = Category.query.get_or_404(id)
+        data = request.get_json()
 
-@api.route('/category/<int:id>', methods=['PUT'])
-def put_categories(id):
-    categories = Category.query.get(id)
+        for field in ['name', 'url_img', 'idu_img']:
+            setattr(category, field, data.get(field, getattr(category, field)))
 
-    if not categories:
-        return jsonify({"message": "Categoría no encontrada"}), 404
-    body = request.json
+        db.session.commit()
+        return jsonify({"message": "Category updated successfully"}), 200
 
-    categories.name = body['name']
-    categories.url_img = body['url_img']
-    categories.idu_img = body['idu_img']
+    except Exception as e:
+        abort(500, message=f"An error occurred while updating the category: {str(e)}")
 
-    db.session.commit()
+@api.route('/categories/<int:id>', methods=['DELETE'])
+def delete_category(id):
+    try:
+        category = Category.query.get_or_404(id)
+        db.session.delete(category)
+        db.session.commit()
 
-    return jsonify({"message": "Categoría modificada con éxito"}), 200
+        return jsonify({"message": "Category deleted successfully"}), 200
 
-@api.route('/category/<int:id>', methods=['DELETE'])
-def delete_categories(id):
-    categories = Category.query.get(id)
+    except Exception as e:
+        abort(500, message=f"An error occurred while deleting the category: {str(e)}")
 
-    if not categories:
-        return jsonify({"message": "Categoría no encontrada"}), 404
-    
-    db.session.delete(categories)
-    db.session.commit()
-
-    return jsonify({"message": "Categoría eliminada con éxito"}), 200
+#Cart
 
 @api.route('/cart', methods=['GET'])
 @jwt_required()
 def get_carts():
-    id = get_jwt_identity()
+    try:
+        user_id = get_jwt_identity()
+        all_items = Cart.query.filter_by(id_User=user_id, id_Order=None).all()
+        items_serialized = [item.serialize() for item in all_items]
 
-    all_items = Cart.query.filter_by(id_Restaurant=id, id_Order=None).all()
-    items_serialize = [item.serialize() for item in all_items]
-    cart_with_product_info = []
+        cart_with_product_info = []
+        for item in items_serialized:
+            product_id = item["id_Product"]
+            product = Product.query.get(product_id)
+            if product:
+                item['product_info'] = product.serialize()
+                cart_with_product_info.append(item)
 
-    for item in items_serialize:
-        product_id = item["id_Product"]
-        product = Product.query.get(product_id)
-        if product:
-            item['product_info'] = product.serialize()
-            cart_with_product_info.append(item)
-    print(cart_with_product_info)
-    return jsonify(cart_with_product_info), 200
+        return jsonify(cart_with_product_info), 200
+
+    except Exception as e:
+        abort(500, message=f"An error occurred while fetching cart data: {str(e)}")
 
 @api.route('/cart/<int:id>', methods=['PUT'])
 def put_cart(id):
     try:
-        cart = Cart.query.get(id)
+        cart = Cart.query.get_or_404(id)
+        data = request.get_json()
 
-        # Check if cart item exists
-        if not cart:
-            return jsonify({"message": "Cart item not found"}), 404
-
-        body = request.json
-
-        # Update cart item properties
-        cart.amount = body.get('amount', cart.amount)
-        cart.id_Product = body.get('id_Product', cart.id_Product)
-        cart.id_Order = body.get('id_Order', cart.id_Order)
+        for field in ['amount', 'id_Product', 'id_Order']:
+            setattr(cart, field, data.get(field, getattr(cart, field)))
 
         db.session.commit()
-
         return jsonify({"message": "Cart item updated successfully"}), 200
 
     except Exception as e:
-        return jsonify({"error": str(e), "message": "An error occurred while updating the cart item"}), 500
+        abort(500, message=f"An error occurred while updating the cart item: {str(e)}")
 
 @api.route('/cart_add_idOrder/<int:id>', methods=['PUT'])
 def add_order_cart(id):
     try:
-        cart = Cart.query.get(id)
+        cart = Cart.query.get_or_404(id)
+        data = request.get_json()
 
-        # Check if cart item exists
-        if not cart:
-            return jsonify({"message": "Cart item not found"}), 404
-
-        body = request.json
-
-        # Update cart item properties with order information
-        cart.amount = body.get('amount', cart.amount)
-        cart.id_Product = body.get('id_Product', cart.id_Product)
-        cart.id_Order = body.get('id_Order', cart.id_Order)
+        for field in ['amount', 'id_Product', 'id_Order']:
+            setattr(cart, field, data.get(field, getattr(cart, field)))
 
         db.session.commit()
-
-        return jsonify({"message": "Order added to cart item successfully"}), 200
+        return jsonify({"message": "Order added successfully"}), 200
 
     except Exception as e:
-        return jsonify({"error": str(e), "message": "An error occurred while adding order to the cart item"}), 500
-
+        abort(500, message=f"An error occurred while adding order to the cart item: {str(e)}")
 
 @api.route('/cart', methods=['POST'])
 def post_cart():
-    body = request.json
+    try:
+        data = request.get_json()
 
-    existente = Cart.query.filter_by(id_Product = body['id_Product'], id_Order = None).first()
+        required_fields = ['amount', 'id_Product', 'id_Order']
+        for field in required_fields:
+            if field not in data:
+                abort(400, message=f"Missing required field: {field}")
 
-    if (existente):
-        existente.amount = existente.amount + 1,
-        existente.id_Product=body['id_Product'],
-        existente.id_Order = body['id_Order'],
+        existing_cart = Cart.query.filter_by(id_Product=data['id_Product'], id_Order=None).first()
 
-        db.session.commit()
-    else :
-        new_cart = Cart(
-            amount=body['amount'],
-            id_Product=body['id_Product'],
-            id_Order = body['id_Order']
-        )
+        if existing_cart:
+            existing_cart.amount += 1
+            db.session.commit()
+        else:
+            new_cart = Cart(**data)
+            db.session.add(new_cart)
+            db.session.commit()
 
-        db.session.add(new_cart)
-        db.session.commit()
+        return jsonify({"message": "Cart item created or updated successfully"}), 200
 
-    return jsonify({"message": "Carrito creado con éxito"}), 200
+    except Exception as e:
+        abort(500, message=f"An error occurred while processing the cart item: {str(e)}")
 
 @api.route('/cart/<int:id>', methods=['DELETE'])
 def delete_cart(id):
-    cart = Cart.query.get(id)
+    try:
+        cart = Cart.query.get_or_404(id)
+        db.session.delete(cart)
+        db.session.commit()
 
-    if not cart:
-        return jsonify({"message": "Carrito no encontrado"}), 404
-    
-    db.session.delete(cart)
-    db.session.commit()
+        return jsonify({"message": "Cart item deleted successfully"}), 200
 
-    return jsonify({"message": "Carrito eliminado con éxito"}), 200
+    except Exception as e:
+        abort(500, message=f"An error occurred while deleting the cart item: {str(e)}")
+
+#Orders
 
 @api.route('/order', methods=['GET'])
 @jwt_required()
-def get_order(): 
-    
-    all_order = Order.query.all()
-    order_seriallize = [item.serialize() for item in all_order]
-    order_with_info = []
+def get_order():
+    try:
+        all_orders = Order.query.all()
+        orders_with_info = []
 
-    for item in order_seriallize:
-        order_item = item.copy()
-        order_with_info.append(order_item)
+        for order in all_orders:
+            carts = Cart.query.filter_by(id_Order=order.id)
+            cart_with_product_info = []
 
-    return jsonify(order_with_info), 200
+            for cart in carts:
+                product = Product.query.get(cart.id_Product)
+                cart_info = {"product_info": product.serialize()}
+                cart_with_product_info.append(cart_info)
 
-@api.route('/all_order', methods=['GET'])
-@jwt_required()
-def get_all_order():
-    all_order = Order.query.all()
-    order_with_info = []
+            order_item = order.serialize()
+            order_item["products"] = cart_with_product_info
+            orders_with_info.append(order_item)
 
-    for item in all_order:
-        carts = Cart.query.filter_by(id_Order=item.id)
-        cart_with_product_info = []
+        return jsonify(orders_with_info), 200
 
-        for cart in carts:
-            product = Product.query.get(cart.id_Product)
-            cart_info = {
-                'product_info': product.serialize(),
-            }
-            cart_with_product_info.append(cart_info)
-
-        order_item = item.serialize()
-
-        order_item['products'] = cart_with_product_info
-        order_with_info.append(order_item)
-
-    return jsonify(order_with_info), 200
-
+    except Exception as e:
+        abort(500, message=f"An error occurred while fetching order data: {str(e)}")
 
 @api.route('/order/<id>', methods=['PUT'])
 def put_order(id):
     try:
-        order = Order.query.get(id)
+        order = Order.query.get_or_404(id)
+        data = request.get_json()
 
-        # Check if order exists
-        if not order:
-            return jsonify({"message": "Order not found"}), 404
-
-        body = request.json
-
-        # Update order properties
-        order.state = body.get('state', order.state)
-        order.day_Date = body.get('day_Date', order.day_Date)
-        order.month_Date = body.get('month_Date', order.month_Date)
-        order.year_Date = body.get('year_Date', order.year_Date)
-        order.value = body.get('value', order.value)
+        for field in ['state', 'day_Date', 'month_Date', 'year_Date', 'value']:
+            setattr(order, field, data.get(field, getattr(order, field)))
 
         db.session.commit()
-
         return jsonify({"message": "Order updated successfully"}), 200
 
     except Exception as e:
-        return jsonify({"error": str(e), "message": "An error occurred while updating the order"}), 500
-
+        abort(500, message=f"An error occurred while updating the order: {str(e)}")
 
 @api.route('/order', methods=['POST'])
 def post_order():
-    body = request.json
-    new_order = Order(
-        id=body["id"],
-        state= "Creada",
-        day_Date=body["day_Date"],
-        month_Date=body["month_Date"],
-        value=body["value"],
-        year_Date=body["year_Date"],
-    )
+    try:
+        data = request.get_json()
 
-    db.session.add(new_order)
-    db.session.commit()
+        required_fields = ['id', 'day_Date', 'month_Date', 'year_Date', 'value']
+        for field in required_fields:
+            if field not in data:
+                abort(400, message=f"Missing required field: {field}")
 
-    return jsonify({"message": "Orden creada con éxito"}), 200
+        new_order = Order(
+            id=data['id'],
+            state=data.get('state', 'Creada'),
+            day_Date=data['day_Date'],
+            month_Date=data['month_Date'],
+            year_Date=data['year_Date'],
+            value=data['value']
+        )
+
+        db.session.add(new_order)
+        db.session.commit()
+        return jsonify({"message": "Order created successfully"}), 200
+
+    except Exception as e:
+        abort(500, message=f"An error occurred while creating the order: {str(e)}")
 
 @api.route('/order/<id>', methods=['DELETE'])
 def delete_order(id):
+    try:
+        order = Order.query.get_or_404(id)
+        db.session.delete(order)
+        db.session.commit()
+        return jsonify({"message": "Order deleted successfully"}), 200
 
-    order = Order.query.get(id)
+    except Exception as e:
+        abort(500, message=f"An error occurred while deleting the order: {str(e)}")
 
-    if not order:
-        return jsonify({"message": "Orden no encontrada"}), 404
+@api.route('/all_order', methods=['GET'])
+@jwt_required()
+def get_all_order():
+    try:
+        all_orders = Order.query.all()
+        orders_with_info = []
 
-    db.session.delete(order)
-    db.session.commit()
-    
-    return jsonify({"message": "Orden eliminada con éxito"}), 200
+        for order in all_orders:
+            carts = Cart.query.filter_by(id_Order=order.id)
+            cart_with_product_info = []
+
+            for cart in carts:
+                product = Product.query.get(cart.id_Product)
+                cart_info = {"product_info": product.serialize()}
+                cart_with_product_info.append(cart_info)
+
+            order_item = order.serialize()
+            order_item["products"] = cart_with_product_info
+            orders_with_info.append(order_item)
+
+        return jsonify(orders_with_info), 200
+
+    except Exception as e:
+        abort(500, message=f"An error occurred while fetching all order data: {str(e)}")
