@@ -25,7 +25,7 @@ export const User_registration = () => {
                 num_contact: num_contact
             };
 
-            await actions.postRegister(usuario);
+            await actions.post_user(usuario);
             setCreate(true);
         } catch (error) {
             console.error("Error al registrar el usuario:", error);
