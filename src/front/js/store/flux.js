@@ -66,35 +66,40 @@ const getState = ({ getStore, getActions, setStore }) => {
 					setStore({ auth : true})
 				}
 			},
-			postUser: async (email,password) => {
-				await fetch(process.env.BACKEND_URL + "api/users", {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*'
-					},
-					body: JSON.stringify({
-						email : email,
-						password: password
-					})
+			postUser: async (email, password) => {
+				try {
+				const response = await fetch(process.env.BACKEND_URL + "api/login", {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Access-Control-Allow-Origin': '*'
+				},
+				body: JSON.stringify({
+					email: email,
+					password: password
 				})
-				.then((response)=> {
-					if (response.status == 200){
-						setStore({ auth : true})
-					}
-					else{
-						setStore({ errorLogin : true })
-					}
-					return response.json()
-				})
-				.then((data)=> {
-					localStorage.setItem("token",data.token);
-					localStorage.setItem("id",data.user_id);
-					setStore({user : data.user})
-					setStore({name : data.name})
-				})
-				await getActions().getCart()
-			},
+				});
+
+				if (response.status === 200) {
+				setStore({ auth: true });
+				} else {
+				setStore({ errorLogin: true });
+				}
+
+				const data = await response.json();
+
+				localStorage.setItem("token", data.token);
+				localStorage.setItem("id", data.user_id);
+
+				setStore({ user: data.user });
+				setStore({ name: data.name });
+
+				await getActions().getCart();
+				} catch (error) {
+				console.error('Error al realizar la solicitud POST:', error);
+				}
+				},
+
 
 			post_user: async (obj) => {
 				try {

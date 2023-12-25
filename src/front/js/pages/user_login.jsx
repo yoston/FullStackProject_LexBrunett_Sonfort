@@ -4,19 +4,19 @@ import { Link, Navigate } from "react-router-dom";
 
 export const User_login = () => {
     const { store, actions } = useContext(Context);
-
-    /*const [name, setName] = useState("");*/
     const [password, setPassword] = useState("");
-    const [redirect, setRedirect] = useState(false)
+    const [showPassword, setShowPassword] = useState(false); // Agregado para controlar la visibilidad de la contraseña
+    const [redirect, setRedirect] = useState(false);
+    const [email, setEmail] = useState("");
 
-    const [email , setEmail] = useState("");
-    
-    useEffect(()=>{
-        setRedirect(false)
-    },[redirect])
+    useEffect(() => {
+        setRedirect(false);
+    }, [redirect]);
 
-    function loguearUser (e) {
+    function loguearUser(e) {
         e.preventDefault();
+        console.log("Email:", email);
+        console.log("Password:", password);
         actions.postUser(email, password);
     }
 
@@ -38,9 +38,14 @@ export const User_login = () => {
                         </div>
                         <div className="mb-3">
                             <label htmlFor="inputPassword1" className="form-label"><b>Contraseña</b></label>
-                            <input type="password" className="form-control" id="inputPassword1" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Ingresa tu Contraseña" />
+                            <div className="input-group">
+                                <input type={showPassword ? "text" : "password"} className="form-control" id="inputPassword1" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Ingresa tu Contraseña" />
+                                <button type="button" className="btn btn-outline-secondary" onClick={() => setShowPassword(!showPassword)}>
+                                    Mostrar
+                                </button>
+                            </div>
                         </div>
-                        <button className="btn btn-success" type="submit" data-bs-dismiss="modal" aria-label="Close" style={{borderRadius:"8px" ,backgroundColor:"#800080"}}><b>Loguear</b></button>
+                        <button className="btn btn-success" type="submit" data-bs-dismiss="modal" aria-label="Close" style={{ borderRadius: "8px", backgroundColor: "#800080" }}><b>Loguear</b></button>
                     </form>
                 </div>
                 <div className="modal-footer border-0 justify-content-center">
@@ -52,5 +57,5 @@ export const User_login = () => {
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
