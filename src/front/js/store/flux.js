@@ -1,6 +1,3 @@
-import { initializeApp } from "firebase/app";
-import { getStorage , ref , uploadBytes , getDownloadURL , deleteObject } from "firebase/storage";
-import { v4 } from 'uuid';
 
 /* const firebaseConfig = {
 
@@ -13,6 +10,10 @@ import { v4 } from 'uuid';
 }; */
 
 //const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG)
+
+import { initializeApp } from "firebase/app";
+import { getStorage , ref , uploadBytes , getDownloadURL , deleteObject } from "firebase/storage";
+import { v4 } from 'uuid';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDSBh1QQAFrXNhHBZjxrPBaoCnS6FwsjEs",
@@ -95,7 +96,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				await getActions().getCart()
 			},
 
-			post_usuario: async (obj) => {
+			post_user: async (obj) => {
 				try {
 					const response = await fetch(process.env.BACKEND_URL + 'api/user_registration', {
 					method: 'POST',
