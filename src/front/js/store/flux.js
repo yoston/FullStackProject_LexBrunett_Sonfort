@@ -66,15 +66,15 @@ const getState = ({ getStore, getActions, setStore }) => {
 					setStore({ auth : true})
 				}
 			},
-			postUser: async (name,password) => {
-				await fetch(process.env.BACKEND_URL + "api/login_user", {
+			postUser: async (email,password) => {
+				await fetch(process.env.BACKEND_URL + "api/users", {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
 						'Access-Control-Allow-Origin':'*'
 					},
 					body: JSON.stringify({
-						name : name,
+						email : email,
 						password: password
 					})
 				})
@@ -98,7 +98,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 			post_user: async (obj) => {
 				try {
-					const response = await fetch(process.env.BACKEND_URL + 'api/user_registration', {
+					const response = await fetch(process.env.BACKEND_URL + 'api/users', {
 					method: 'POST',
 					headers: {
 					'Content-Type': 'application/json',
