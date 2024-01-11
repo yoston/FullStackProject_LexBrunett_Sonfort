@@ -1,5 +1,6 @@
 {
 	"name": "react-hello-webapp",
+	"proxy": "https://cuddly-xylophone-96wv6qv5x99397xq-3001.app.github.dev/",
 	"engines": {
 		"node": "16.x"
 	},
@@ -73,6 +74,7 @@
 		]
 	},
 	"dependencies": {
+		"cors": "^2.8.5",
 		"firebase": "^10.7.1",
 		"prop-types": "^15.6.1",
 		"react": "^16.8.4",

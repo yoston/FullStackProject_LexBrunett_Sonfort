@@ -71,9 +71,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 				const response = await fetch(process.env.BACKEND_URL + "api/login", {
 				method: 'POST',
 				headers: {
+					
+
 					'Content-Type': 'application/json',
-					'Access-Control-Allow-Origin': '*'
-				},
+					//'Access-Control-Allow-Origin': '*',
+					
+				},mode: 'no-cors',
 				body: JSON.stringify({
 					email: email,
 					password: password
@@ -174,7 +177,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 					.then((data)=> console.log(data))
 				},
 			getCategories: async() => {
-				const response = await fetch(process.env.BACKEND_URL + 'api/category')
+				const response = await fetch(process.env.BACKEND_URL + 'api/category',{
+					
+					mode: 'no-cors'})
 				const body = await response.json();
 				setStore({categories: body})
 			},
@@ -222,7 +227,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					headers: {
 						'Content-Type': 'application/json',
 						'Access-Control-Allow-Origin':'*'
-					},
+					},mode: 'no-cors'
 				})
 				.then( response => response.json())
 				.then( data => setStore({ products: data }));
