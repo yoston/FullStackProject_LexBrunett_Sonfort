@@ -7,6 +7,8 @@ from firebase_admin import credentials,initialize_app
 
 cred = credentials.Certificate("src/api/key.json")
 
+
+
 default_app = initialize_app(cred)
 
 
@@ -38,7 +40,10 @@ jwt = JWTManager(app)
 # CORS(app)
 # CORS(app, resources={r"*": {"origins": "*", "methods": ["GET", "POST", "PUT", "DELETE"], "allow_headers": "*"}})
 # CORS(app, resources={r"/api/*": {"origins": "*"}})
-CORS(app, resources={r"/api/*": {"origins": "https://cuddly-xylophone-96wv6qv5x99397xq-3001.app.github.dev"}})
+# CORS(app, resources={r"/api/*": {"origins": "https://cuddly-xylophone-96wv6qv5x99397xq-3001.app.github.dev"}})
+CORS(app, resources={r"/api/*": {"origins": "*","methods": ["GET", "POST", "PUT", "DELETE"], "allow_headers": "*"}})
+
+
 
 from api.utils import APIException, generate_sitemap
 from api.models import db

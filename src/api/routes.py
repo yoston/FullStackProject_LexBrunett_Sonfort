@@ -3,7 +3,20 @@ from flask import Flask, request, jsonify, url_for, Blueprint, jsonify
 from api.models import db, User, Product, Category, Cart, Order
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
 import re
-from firebase_admin import firestore
+from firebase_admin import firestore, auth
+
+
+# firebaseConfig = {
+#   "apiKey": "AIzaSyCblEsWNHBMkJEymbCnh0lJqy1LUI3qiJk",
+#   "authDomain": "digitalstore-58a25.firebaseapp.com",
+#   "projectId": "digitalstore-58a25",
+#   "storageBucket": "digitalstore-58a25.appspot.com",
+#   "messagingSenderId": "766747723027",
+#   "appId": "1:766747723027:web:2a5a6f11fb7797501e86e6"
+# }
+
+# firebase = pyrebase.initialize_app(firebaseConfig)
+# auth = firebase.auth()
 
 # Iniciamos base de datos de firebase
 db = firestore.client()
@@ -13,11 +26,8 @@ user_ref = db.collection("user")
 
 
 
+
 api = Blueprint('api', __name__)
-
-
-
-
 
 
 # Funciones auxiliares
@@ -58,15 +68,28 @@ def handle_user_creation(body):
 def validar_usuario(username, password):
     # Implementa tu lógica de validación aquí
     # Por ejemplo, verificar contra una base de datos
-    return True  # o False si las credenciales son incorrectas
-
-
+    
+    return True   
+    
+    # try:
+    #     auth.sign_in_with_email_and_password(username,password)
+    #     user_info= auth.sign_in_with_email_and_password(username,password)
+    #     account_info = auth.get_account_info(user_info["idToken"])
+    #     if account_info["user"][0]["emailVerified"] == False:
+    #         return False
+    #     return True  # o False si las credenciales son incorrectas
+    # except Exception as e:
+    #     print("error",e)
+    #     return False
 
 
 # Rutas de Usuarios
 @api.route('/users', methods=['GET'])
 def get_users():
-    return "HOLA ESTA ES UNA PRUEBA"
+    
+    return jsonify({"message":  "HOLA ESTA ES UNA PRUEBA DE GET"}), 200
+    #productos = db.get("/productos")
+    
     # try:
     #     all_users = User.query.all()
     #     users_serialized = [user.serialize() for user in all_users]
@@ -79,15 +102,14 @@ def get_users():
 @api.route("/users", methods=['POST'])
 def post_user():
 
-    return jsonify({"success": 200, "message": "HOLA ESTA ES UNA PRUEBA2"}), 200
+    # return jsonify({"msg": "HOLA ESTA ES UNA PRUEBA DE GET"}), 200
 
     try:
         id = uuid.uuid4()
         user_ref.document(id.hex).set(request.json)
         return jsonify({"success":True}),200
     except Exception as e:
-        return f"An error ocurred {e}"
-
+        return jsonify({"error": str(e), "message": "An error occurred while creating the user"}), 500
     # try:
     #     body = request.json
     #     response = handle_user_creation(body)

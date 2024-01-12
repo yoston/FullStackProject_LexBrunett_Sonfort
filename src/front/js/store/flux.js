@@ -1,4 +1,3 @@
-
 /* const firebaseConfig = {
 
   apiKey: process.env.API_KEY,
@@ -12,8 +11,14 @@
 //const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG)
 
 import { initializeApp } from "firebase/app";
-import { getStorage , ref , uploadBytes , getDownloadURL , deleteObject } from "firebase/storage";
-import { v4 } from 'uuid';
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
+import { v4 } from "uuid";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDSBh1QQAFrXNhHBZjxrPBaoCnS6FwsjEs",
@@ -22,436 +27,439 @@ const firebaseConfig = {
   storageBucket: "sonfort-623bb.appspot.com",
   messagingSenderId: "1018044863257",
   appId: "1:1018044863257:web:51c90cd6e49ea26dcbeb88",
-  measurementId: "G-X94FGL5BRV"
+  measurementId: "G-X94FGL5BRV",
 };
 
 export const app = initializeApp(firebaseConfig);
 export const storage = getStorage(app);
 
 const getState = ({ getStore, getActions, setStore }) => {
-  
-	return {
-		store: {
-			categories: [],
-			products: [],
-			carrito: [],
-			order: [],
-			auth: false,
-			user: null,
-			creado: null,
-			priceOrder: null,
-			selectOpcion: null,
-			name: null,
-			errorLogin : false
-		},
-		actions: { 
-			setErrorLogin : (i) => {
-				setStore({errorLogin : i})
-			},
-			setSelectOpcion : (opcion) => {
-				setStore({selectOpcion : opcion})
-				console.log(opcion)
-			},
-			setPriceOrder: (price) => {
-				setStore({priceOrder : price})
-			},
-			vaciar: () => {
-				setStore({creado : false})
-			},
-			creado: () => {
-				setStore({creado : true})
-			},
-			validar: () => {
-				if ( localStorage.getItem("id") && localStorage.getItem("token")) {
-					setStore({ auth : true})
-				}
-			},
-			postUser: async (email, password) => {
+  return {
+    store: {
+      categories: [],
+      products: [],
+      carrito: [],
+      order: [],
+      auth: false,
+      user: null,
+      creado: null,
+      priceOrder: null,
+      selectOpcion: null,
+      name: null,
+      errorLogin: false,
+    },
+    actions: {
+      setErrorLogin: (i) => {
+        setStore({ errorLogin: i });
+      },
+      setSelectOpcion: (opcion) => {
+        setStore({ selectOpcion: opcion });
+        console.log(opcion);
+      },
+      setPriceOrder: (price) => {
+        setStore({ priceOrder: price });
+      },
+      vaciar: () => {
+        setStore({ creado: false });
+      },
+      creado: () => {
+        setStore({ creado: true });
+      },
+      validar: () => {
+        if (localStorage.getItem("id") && localStorage.getItem("token")) {
+          setStore({ auth: true });
+        }
+      },
+      postUser: async (email, password) => {
+        console.log("INICIANDO LOGIN");
 
-				
-				console.log("INICIANDO LOGIN");
+        try {
+          const response = await fetch(process.env.BACKEND_URL + "api/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              // 'Access-Control-Allow-Origin': '*',
+            },
+            body: JSON.stringify({ email, password }),
+          });
 
-				try{
-				
-					  const response = await fetch(process.env.BACKEND_URL + "api/login",{
-						method: 'POST',
-						headers: {
-						  'Content-Type': 'application/json',
-						 'Access-Control-Allow-Origin': '*',
-						},
-						body: JSON.stringify({ email, password }),
-					  });
+          if (!response.ok) {
+            throw new Error("Error en la solicitud de login");
+          }
 
-					  
-				
-					  if (!response.ok) {
-						throw new Error('Error en la solicitud de login');
-					  }
-				
-			
+          // const response = await fetch(process.env.BACKEND_URL + "api/login", {
+          // method: 'POST',
+          // headers: {
 
+          // 	'Content-Type': 'application/json',
+          // 	//'Access-Control-Allow-Origin': '*',
 
-				// const response = await fetch(process.env.BACKEND_URL + "api/login", {
-				// method: 'POST',
-				// headers: {
-					
+          // },mode: 'no-cors',
+          // body: JSON.stringify({
+          // 	email: email,
+          // 	password: password
+          // })
+          // }
 
-				// 	'Content-Type': 'application/json',
-				// 	//'Access-Control-Allow-Origin': '*',
-					
-				// },mode: 'no-cors',
-				// body: JSON.stringify({
-				// 	email: email,
-				// 	password: password
-				// })
-				// }
-				
-				
-				// );
+          // );
 
-				if (response.status === 200) {
-				setStore({ auth: true });
-				} else {
-				setStore({ errorLogin: true });
-				}
+          if (response.status === 200) {
+            setStore({ auth: true });
+          } else {
+            setStore({ errorLogin: true });
+          }
 
-				
+          const data = await response.json();
+          const token = data.access_token; // Asegúrate de que este campo coincida con la respuesta de tu API
+          // Guarda el token para su uso posterior
 
-				const data = await response.json();
-				const token = data.access_token; // Asegúrate de que este campo coincida con la respuesta de tu API
-				// Guarda el token para su uso posterior
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("id", data.user_id);
 
-				
+          setStore({ user: data.user });
+          setStore({ name: data.name });
 
+          await getActions().getCart();
+        } catch (error) {
+          console.error("Error al realizar la solicitud POST:", error);
+        }
+      },
 
-				localStorage.setItem("token", data.token);
-				localStorage.setItem("id", data.user_id);
+      post_user: async (obj) => {
+        console.log("CREANDO USUARIO, antes del post");
 
-				setStore({ user: data.user });
-				setStore({ name: data.name });
+        const usuarioJSON = JSON.stringify(obj);
 
-				await getActions().getCart();
-				} catch (error) {
-				console.error('Error al realizar la solicitud POST:', error);
-				}
-			},
+        console.log(usuarioJSON);
 
+        try {
+          const response = await fetch(process.env.BACKEND_URL + "api/users", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: usuarioJSON,
+          })
+            .then((response) => response.json())
+            .then((data) => console.log(data))
+            .catch((error) => console.error("Error:", error));
 
-			post_user: async (obj) => {
-				
-				console.log("CREANDO USUARIO, antes del post");
-				try {
-					const response = await fetch(process.env.BACKEND_URL + 'api/users', {
-					method: 'POST',
-					headers: {
-					'Content-Type': 'application/json',
-					},mode: 'no-cors',
-					
-				body: JSON.stringify(obj),
-				});
-				console.log("CREANDO USUARIO, antes del post");
-				console.log(response.status);
+          console.log("CREANDO USUARIO, antes del post");
+          console.log(response.status);
 
-			if (!response.ok) {
-			// Manejo de errores para respuestas HTTP no exitosas
-			throw new Error(`Error: ${response.status} - ${response.statusText}`);
-			}
+          if (!response.ok) {
+            // Manejo de errores para respuestas HTTP no exitosas
+            throw new Error(
+              `Error: ${response.status} - ${response.statusText}`
+            );
+          }
 
-			const data = await response.json();
-			console.log(data);
+          const data = await response.json();
+          console.log(data);
 
-			// Llamar a la función getUser después de completar la solicitud con éxito
-			await getActions().getUser();
-			} catch (error) {
-			// Manejo de errores generales
-			console.error('Error al realizar la solicitud POST:', error);
-			}
-			},
-			
-			postAdmin: (email,password) => {
-				fetch(process.env.BACKEND_URL + "api/login", {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*'
-					},
-					body: JSON.stringify({
-						email : email,
-						password: password
-					})
-				})
-				.then((response)=> {
-					if (response.status == 200){
-						setStore({ auth : true})
-					}
-					else {
-						setStore({ errorLogin : true })
-					}
-					return response.json()
-				})
-				.then((data)=> {
-					localStorage.setItem("token",data.token);
-					localStorage.setItem("id",data.user_id);
-					setStore({user : data.user})
-				})
-			},
-			logout : () => {
-				setStore({ auth : false});
-				localStorage.removeItem("token");
-				localStorage.removeItem("id")
-				setStore({user : "null"})
-				getActions().getCart()
-			},
-				postRegister: (user) => {
-					fetch(process.env.BACKEND_URL + "api/user", {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							'Access-Control-Allow-Origin':'*'
-						},
-						body: JSON.stringify(user)
-					})
-					.then((response)=> response.json())
-					.then((data)=> console.log(data))
-				},
-			getCategories: async() => {
-				const response = await fetch(process.env.BACKEND_URL + 'api/category',{
-					
-					mode: 'no-cors'})
-				const body = await response.json();
-				setStore({categories: body})
-			},
-			postCategories : async (obj) => {
-				await fetch(process.env.BACKEND_URL + "api/category", {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*'
-					},
-					body: JSON.stringify(obj)
-				})
-				.then((response)=> response.json())
-				.then((data)=> console.log(data))
-				await getActions().getCategories()
-			},
-			putCategories : async (id,obj) => {
-				await fetch(process.env.BACKEND_URL + 'api/category/'+id, {
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*'
-					},
-					body: JSON.stringify(obj) 
-				})
-				.then((response)=> response.json())
-				.then((data)=> console.log(data));
-				await getActions().getCategories()
-			},
-			deleteCategories : async (id) => {
-				await fetch(process.env.BACKEND_URL + 'api/category/'+id, {
-					method: 'DELETE',
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*'
-					},
-				})
-				.then((response) => response.json())
-				.then((data) => console.log(data))
-				await getActions().getCategories()
-			},			
-			getList: () => {
-				fetch(process.env.BACKEND_URL + 'api/products', 
-				{
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*'
-					},mode: 'no-cors'
-				})
-				.then( response => response.json())
-				.then( data => setStore({ products: data }));
-			},
-			putProduct: async (id, obj) => {
-				await fetch(process.env.BACKEND_URL + `api/products/${id}`, {
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*'
-					},
-					body: JSON.stringify(obj)
-				})
-				.then(response => response.json())
-				.then(data => console.log(data));
-				
-				const product = await getStore().products.find(product => product.id == id) 
-				await getActions().getList()
-			},      
-			postProduct: async (obj) => { 
-				await fetch(process.env.BACKEND_URL + 'api/products', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*'
-					},
-					body: JSON.stringify(obj)
-				})
-				.then( response => response.json())
-				.then( data => console.log(data))
-				await getActions().getList()
-			},
-			deleteProduct: async (id) => {
-				await fetch(process.env.BACKEND_URL + 'api/products/' + id, {
-				method: 'DELETE',
-				headers: {
-					'Content-Type': 'application/json',
-					'Access-Control-Allow-Origin':'*'
-				},
-				}).then( response => response.json())
-				.then( data => console.log(data));
-				
-				await getActions().getList()
-				//const storageRef = ref( storage , `products/${idu}`);
-				//await deleteObject(storageRef);
-			},
-			upload_img : async (file) => {
-				const idu =v4()
-				const storageRef = ref( storage , `products/${idu}`)
-				await uploadBytes( storageRef,file )
-				const url = await getDownloadURL(storageRef)
-				return [url,idu]
-			},
-			getCart :  () => {
-				fetch(process.env.BACKEND_URL + 'api/cart', {
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*',
-						'Authorization': `Bearer ${localStorage.getItem('token')}`
-					},
-				})
-				.then((response) => response.json())
-				.then((data) =>{setStore({ carrito: data });console.log("carrito", data)})
-			},
-			putCart : async (updatedCart , id) => {
-				await fetch(process.env.BACKEND_URL + 'api/cart/'+ id, {
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*'
-					},
-					body: JSON.stringify(updatedCart)
-				})
-				.then((response) => response.json())
-				.then((data) => console.log(data))
-				await getActions().getCart()
-			},
-			addOrderCart : async (updatedCart , id) => {
-				await fetch(process.env.BACKEND_URL + 'api/cart_add_idOrder/'+ id, {
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*'
-					},
-					body: JSON.stringify(updatedCart)
-				})
-				.then((response) => response.json())
-				.then((data) => console.log(data))
-				await getActions().getCart()
-			},
-			postCart: async (amount,id_product,id_restaurant) => {
-				await fetch(process.env.BACKEND_URL + 'api/cart', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*'
-					},
-					body: JSON.stringify({
-						amount : amount,
-						id_Product : id_product,
-						id_Restaurant : id_restaurant,
-						id_Order: null
-					}) 
-				})
-				.then( response => response.json())
-				.then( data => console.log(data))
-				await getActions().getCart()
-			},
-			deleteCart : async (id) => {
-				await fetch(process.env.BACKEND_URL + 'api/cart/' + id, {
-					method: 'DELETE',
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*'
-					}
-				})
-				.then( response => response.json())
-				.then( data => console.log(data));
-				await getActions().getCart()
-			},
-			getOrder :  (token) => {
-				fetch(process.env.BACKEND_URL + 'api/order', {
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*',
-						'Authorization': `Bearer ${token}`
-					},
-				})
-				.then((response) => response.json())
-				.then((data) =>{setStore({ order : data });console.log(data)})
-			},
-			getAllOrder : (token) => {
-				fetch(process.env.BACKEND_URL + 'api/all_order', {
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*',
-						'Authorization': `Bearer ${token}`
-					},
-				})
-				.then((response) => response.json())
-				.then((data) => setStore({ order : data }))
-			},
-			putOrder : async (updatedOrder , id) => {
-				console.log(updatedOrder)
-				await fetch(process.env.BACKEND_URL + 'api/order/'+ id, {
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*'
-					},
-					body: JSON.stringify(updatedOrder)
-				})
-				.then((response) => response.json())
-				.then((data) => console.log(data))
-				await getActions().getAllOrder(localStorage.getItem("token"))
-			},
-			postOrder: async (order) => {
-				order.id = v4();
-				console.log(order);
-				await fetch(process.env.BACKEND_URL + 'api/order', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*'
-					},
-					body: JSON.stringify(order) 
-				})
-				.then( response => response.json())
-				.then( data => console.log(data))
-				await getActions().getOrder(localStorage.getItem("token"))
-				return order.id;
-			},
-			deleteOrder : async (id) => {
-				await fetch(process.env.BACKEND_URL + 'api/order/' + id, {
-					method: 'DELETE',
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin':'*'
-					}
-				})
-				.then( response => response.json())
-				.then( data => console.log(data));
-				await getActions().getAllOrder(localStorage.getItem("token"))
-			},
-		}
-	};
+          // Llamar a la función getUser después de completar la solicitud con éxito
+          await getActions().getUser();
+        } catch (error) {
+          // Manejo de errores generales
+          console.error("Error al realizar la solicitud POST:", error);
+        }
+      },
+
+      postAdmin: (email, password) => {
+		console.log("Iniciando login");
+        fetch(process.env.BACKEND_URL + "api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+            password: password,
+          }),
+        })
+          .then((response) => {
+
+			console.log("Respuesta");
+			console.log(response);
+            if (response.status == 200) {
+              setStore({ auth: true });
+            } else {
+              setStore({ errorLogin: true });
+            }
+            return response.json();
+          })
+          .then((data) => {
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("id", data.user_id);
+            setStore({ user: data.user });
+          });
+      },
+      logout: () => {
+        setStore({ auth: false });
+        localStorage.removeItem("token");
+        localStorage.removeItem("id");
+        setStore({ user: "null" });
+        getActions().getCart();
+      },
+      postRegister: (user) => {
+        fetch(process.env.BACKEND_URL + "api/user", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify(user),
+        })
+          .then((response) => response.json())
+          .then((data) => console.log(data));
+      },
+      getCategories: async () => {
+        const response = await fetch(process.env.BACKEND_URL + "api/category", {
+          mode: "no-cors",
+        });
+        const body = await response.json();
+        setStore({ categories: body });
+      },
+      postCategories: async (obj) => {
+        await fetch(process.env.BACKEND_URL + "api/category", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify(obj),
+        })
+          .then((response) => response.json())
+          .then((data) => console.log(data));
+        await getActions().getCategories();
+      },
+      putCategories: async (id, obj) => {
+        await fetch(process.env.BACKEND_URL + "api/category/" + id, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify(obj),
+        })
+          .then((response) => response.json())
+          .then((data) => console.log(data));
+        await getActions().getCategories();
+      },
+      deleteCategories: async (id) => {
+        await fetch(process.env.BACKEND_URL + "api/category/" + id, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => console.log(data));
+        await getActions().getCategories();
+      },
+      getList: () => {
+        fetch(process.env.BACKEND_URL + "api/products", {
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          mode: "no-cors",
+        })
+          .then((response) => response.json())
+          .then((data) => setStore({ products: data }));
+      },
+      putProduct: async (id, obj) => {
+        await fetch(process.env.BACKEND_URL + `api/products/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify(obj),
+        })
+          .then((response) => response.json())
+          .then((data) => console.log(data));
+
+        const product = await getStore().products.find(
+          (product) => product.id == id
+        );
+        await getActions().getList();
+      },
+      postProduct: async (obj) => {
+        await fetch(process.env.BACKEND_URL + "api/products", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify(obj),
+        })
+          .then((response) => response.json())
+          .then((data) => console.log(data));
+        await getActions().getList();
+      },
+      deleteProduct: async (id) => {
+        await fetch(process.env.BACKEND_URL + "api/products/" + id, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => console.log(data));
+
+        await getActions().getList();
+        //const storageRef = ref( storage , `products/${idu}`);
+        //await deleteObject(storageRef);
+      },
+      upload_img: async (file) => {
+        const idu = v4();
+        const storageRef = ref(storage, `products/${idu}`);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        return [url, idu];
+      },
+      getCart: () => {
+        fetch(process.env.BACKEND_URL + "api/cart", {
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            setStore({ carrito: data });
+            console.log("carrito", data);
+          });
+      },
+      putCart: async (updatedCart, id) => {
+        await fetch(process.env.BACKEND_URL + "api/cart/" + id, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify(updatedCart),
+        })
+          .then((response) => response.json())
+          .then((data) => console.log(data));
+        await getActions().getCart();
+      },
+      addOrderCart: async (updatedCart, id) => {
+        await fetch(process.env.BACKEND_URL + "api/cart_add_idOrder/" + id, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify(updatedCart),
+        })
+          .then((response) => response.json())
+          .then((data) => console.log(data));
+        await getActions().getCart();
+      },
+      postCart: async (amount, id_product, id_restaurant) => {
+        await fetch(process.env.BACKEND_URL + "api/cart", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify({
+            amount: amount,
+            id_Product: id_product,
+            id_Restaurant: id_restaurant,
+            id_Order: null,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => console.log(data));
+        await getActions().getCart();
+      },
+      deleteCart: async (id) => {
+        await fetch(process.env.BACKEND_URL + "api/cart/" + id, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => console.log(data));
+        await getActions().getCart();
+      },
+      getOrder: (token) => {
+        fetch(process.env.BACKEND_URL + "api/order", {
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            setStore({ order: data });
+            console.log(data);
+          });
+      },
+      getAllOrder: (token) => {
+        fetch(process.env.BACKEND_URL + "api/all_order", {
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => setStore({ order: data }));
+      },
+      putOrder: async (updatedOrder, id) => {
+        console.log(updatedOrder);
+        await fetch(process.env.BACKEND_URL + "api/order/" + id, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify(updatedOrder),
+        })
+          .then((response) => response.json())
+          .then((data) => console.log(data));
+        await getActions().getAllOrder(localStorage.getItem("token"));
+      },
+      postOrder: async (order) => {
+        order.id = v4();
+        console.log(order);
+        await fetch(process.env.BACKEND_URL + "api/order", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify(order),
+        })
+          .then((response) => response.json())
+          .then((data) => console.log(data));
+        await getActions().getOrder(localStorage.getItem("token"));
+        return order.id;
+      },
+      deleteOrder: async (id) => {
+        await fetch(process.env.BACKEND_URL + "api/order/" + id, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => console.log(data));
+        await getActions().getAllOrder(localStorage.getItem("token"));
+      },
+    },
+  };
 };
 
 export default getState;
