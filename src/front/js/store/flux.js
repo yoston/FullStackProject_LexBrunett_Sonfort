@@ -67,21 +67,47 @@ const getState = ({ getStore, getActions, setStore }) => {
 				}
 			},
 			postUser: async (email, password) => {
-				try {
-				const response = await fetch(process.env.BACKEND_URL + "api/login", {
-				method: 'POST',
-				headers: {
+
+				
+				console.log("INICIANDO LOGIN");
+
+				try{
+				
+					  const response = await fetch(process.env.BACKEND_URL + "api/login",{
+						method: 'POST',
+						headers: {
+						  'Content-Type': 'application/json',
+						 'Access-Control-Allow-Origin': '*',
+						},
+						body: JSON.stringify({ email, password }),
+					  });
+
+					  
+				
+					  if (!response.ok) {
+						throw new Error('Error en la solicitud de login');
+					  }
+				
+			
+
+
+				// const response = await fetch(process.env.BACKEND_URL + "api/login", {
+				// method: 'POST',
+				// headers: {
 					
 
-					'Content-Type': 'application/json',
-					//'Access-Control-Allow-Origin': '*',
+				// 	'Content-Type': 'application/json',
+				// 	//'Access-Control-Allow-Origin': '*',
 					
-				},mode: 'no-cors',
-				body: JSON.stringify({
-					email: email,
-					password: password
-				})
-				});
+				// },mode: 'no-cors',
+				// body: JSON.stringify({
+				// 	email: email,
+				// 	password: password
+				// })
+				// }
+				
+				
+				// );
 
 				if (response.status === 200) {
 				setStore({ auth: true });
@@ -89,7 +115,14 @@ const getState = ({ getStore, getActions, setStore }) => {
 				setStore({ errorLogin: true });
 				}
 
+				
+
 				const data = await response.json();
+				const token = data.access_token; // Asegúrate de que este campo coincida con la respuesta de tu API
+				// Guarda el token para su uso posterior
+
+				
+
 
 				localStorage.setItem("token", data.token);
 				localStorage.setItem("id", data.user_id);
@@ -101,18 +134,23 @@ const getState = ({ getStore, getActions, setStore }) => {
 				} catch (error) {
 				console.error('Error al realizar la solicitud POST:', error);
 				}
-				},
+			},
 
 
 			post_user: async (obj) => {
+				
+				console.log("CREANDO USUARIO, antes del post");
 				try {
 					const response = await fetch(process.env.BACKEND_URL + 'api/users', {
 					method: 'POST',
 					headers: {
 					'Content-Type': 'application/json',
-					},
+					},mode: 'no-cors',
+					
 				body: JSON.stringify(obj),
 				});
+				console.log("CREANDO USUARIO, antes del post");
+				console.log(response.status);
 
 			if (!response.ok) {
 			// Manejo de errores para respuestas HTTP no exitosas

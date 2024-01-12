@@ -7,6 +7,9 @@ import "../styles/index.css";
 
 //import your own components
 import Layout from "./layout";
+import { app } from "./store/flux";
+
+
 
 
 //render your react application

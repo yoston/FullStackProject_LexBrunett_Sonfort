@@ -1,9 +1,24 @@
-from flask import Flask, request, jsonify, url_for, Blueprint
+import uuid
+from flask import Flask, request, jsonify, url_for, Blueprint, jsonify
 from api.models import db, User, Product, Category, Cart, Order
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
 import re
+from firebase_admin import firestore
+
+# Iniciamos base de datos de firebase
+db = firestore.client()
+user_ref = db.collection("user")
+
+
+
+
 
 api = Blueprint('api', __name__)
+
+
+
+
+
 
 # Funciones auxiliares
 def validate_email(email):
@@ -11,7 +26,7 @@ def validate_email(email):
 
 def handle_user_creation(body):
     required_fields = ['username', 'email', 'password', 'name_contact', 'num_contact']
-    
+
     for field in required_fields:
         if field not in body:
             return jsonify({"error": f"Missing required field: {field}"}), 400
@@ -37,27 +52,49 @@ def handle_user_creation(body):
 
     return jsonify({"message": "User created successfully"}), 200
 
+
+
+# Supongamos que tienes una función para validar credenciales
+def validar_usuario(username, password):
+    # Implementa tu lógica de validación aquí
+    # Por ejemplo, verificar contra una base de datos
+    return True  # o False si las credenciales son incorrectas
+
+
+
+
 # Rutas de Usuarios
 @api.route('/users', methods=['GET'])
 def get_users():
-    try:
-        all_users = User.query.all()
-        users_serialized = [user.serialize() for user in all_users]
+    return "HOLA ESTA ES UNA PRUEBA"
+    # try:
+    #     all_users = User.query.all()
+    #     users_serialized = [user.serialize() for user in all_users]
 
-        return jsonify(users_serialized), 200
+    #     return jsonify(users_serialized), 200
 
-    except Exception as e:
-        return jsonify({"error": str(e), "message": "An error occurred while fetching user data"}), 500
+    # except Exception as e:
+    #     return jsonify({"error": str(e), "message": "An error occurred while fetching user data"}), 500
 
-@api.route("/users", methods=["POST"])
+@api.route("/users", methods=['POST'])
 def post_user():
-    try:
-        body = request.json
-        response = handle_user_creation(body)
-        return response
 
+    return jsonify({"success": 200, "message": "HOLA ESTA ES UNA PRUEBA2"}), 200
+
+    try:
+        id = uuid.uuid4()
+        user_ref.document(id.hex).set(request.json)
+        return jsonify({"success":True}),200
     except Exception as e:
-        return jsonify({"error": str(e), "message": "An error occurred while creating the user"}), 500
+        return f"An error ocurred {e}"
+
+    # try:
+    #     body = request.json
+    #     response = handle_user_creation(body)
+    #     return response
+
+    # except Exception as e:
+    #     return jsonify({"error": str(e), "message": "An error occurred while creating the user"}), 500
 
 @api.route('/users/<int:id>', methods=['PUT'])
 def put_user(id):
@@ -70,7 +107,7 @@ def put_user(id):
         body = request.json
         user.username = body.get('username', user.username)
         user.email = body.get('email', user.email)
-                
+
         # Check if password is present in the request before updating
         if 'password' in body:
             user.set_password(body['password'])
@@ -89,7 +126,7 @@ def put_user(id):
 def delete_user(id):
     try:
         user = User.query.get(id)
-        
+
         # Check if user exists
         if not user:
             return jsonify({"message": "User not found"}), 404
@@ -104,44 +141,65 @@ def delete_user(id):
 
 # logins
 
-@api.route("/login", methods=["POST"])
-def post_login():
-    try:
-        # Retrieve user credentials from the request JSON
-        email = request.json.get("email", None)
-        password = request.json.get("password", None)
+@api.route('/login', methods=['POST'])
+def login():
+    
+    print("FLASK DENTRO DE LOGIN")
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
 
-        # Check if both username/email and password are provided
-        if not email or not password:
-            return jsonify({"error": "Invalid input", "message": "Username/Email and password are required"}), 400
+    
 
-        # Query the database to find the user by username or email
-        user = User.query.filter(
-            (User.username == email) | (User.email == email)
-        ).first()
+    # Aquí puedes encriptar o verificar la contraseña como sea necesario
+    password_hash = password # hashlib.sha256(password.encode()).hexdigest()
 
-        # Check if the user is not found or the password is incorrect
-        if user is None or not user.check_password(password):
-            return jsonify({"error": "Invalid credentials", "message": "Invalid username/email or password"}), 401
-        
-        # Generate an access token
-        access_token = create_access_token(identity=user.id)
+    if validar_usuario(username, password_hash):
+        access_token = create_access_token(identity=username)
+        return jsonify(access_token=access_token), 200
+    else:
+        return jsonify({"msg": "Credenciales incorrectas"}), 401
 
-        # Return the access token and user information
-        response_data = {
-            "token": access_token,
-            "user": {
-                "id": user.id,
-                "username": user.username,
-                "name": user.name,
-            }
-        }
 
-        return jsonify(response_data), 200
+# @api.route("/login", methods=["POST"])
+# def post_login():
+#     try:
+#         # Retrieve user credentials from the request JSON
+#         email = request.json.get("email", None)
+#         password = request.json.get("password", None)
 
-    except Exception as e:
-        # Handle any unexpected exceptions
-        return jsonify({"error": str(e), "message": "An error occurred while processing the login"}), 500
+#         # Check if both username/email and password are provided
+#         if not email or not password:
+#             return jsonify({"error": "Invalid input", "message": "Username/Email and password are required"}), 400
+
+#         # Query the database to find the user by username or email
+#         user = User.query.filter(
+#             (User.username == email) | (User.email == email)
+#         ).first()
+
+#         # Check if the user is not found or the password is incorrect
+#         if user is None or not user.check_password(password):
+#             return jsonify({"error": "Invalid credentials", "message": "Invalid username/email or password"}), 401
+
+#         # Generate an access token
+#         access_token = create_access_token(identity=user.id)
+
+#         # Return the access token and user information
+#         response_data = {
+#             "token": access_token,
+#             "user": {
+#                 "id": user.id,
+#                 "username": user.username,
+#                 "name": user.name,
+#             }
+#         }
+
+#         return jsonify(response_data), 200
+
+#     except Exception as e:
+#         # Handle any unexpected exceptions
+#         return jsonify({"error": str(e), "message": "An error occurred while processing the login"}), 500
+
+
 
 # Products
 
